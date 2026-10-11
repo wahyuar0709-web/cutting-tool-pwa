@@ -140,6 +140,24 @@ function api_dashboard() {
       return null;
     };
 
+    // TOTAL ERROR dan TOTAL PERINGATAN TIDAK ada di DASHBOARD —
+    // keduanya berada di sheet Master Data Audit. Membacanya dari DASHBOARD
+    // selalu menghasilkan null, dan galat yang tidak terlihat adalah galat
+    // yang paling berbahaya.
+    let totalError = null, totalPeringatan = null;
+    try {
+      const shA = sh_('MASTER_DATA_AUDIT');
+      const jmlA = Math.min(shA.getLastRow(), 40);
+      const barisA = shA.getRange(1, 1, jmlA, 6).getValues().map((r) => r.map((c) => String(c === null || c === undefined ? '' : c).trim()));
+      const cari = (awal) => barisA.find((r) => r.some((c) => c.indexOf(awal) === 0));
+      const ambil = (awal) => {
+        const r = cari(awal);
+        return r ? (Number(r[3]) || 0) : null;
+      };
+      totalError = ambil('TOTAL ERROR');
+      totalPeringatan = ambil('TOTAL PERINGATAN');
+    } catch (e) { /* sheet belum ada */ }
+
     return ok_({
       badge: (cariBaris('Kualitas data:') >= 0 ? (teks[cariBaris('Kualitas data:')].find((c) => /BERSIH|ERROR/.test(c)) || '') : ''),
       totalUnit: nilaiDiBawah('Total Unit Aktif', 0),
@@ -153,8 +171,8 @@ function api_dashboard() {
       peringatan: nilaiDiBawah('Item WASPADA', 0),
       wajibScrap: nilaiDiBawah('Unit WAJIB Evaluasi Scrap', 0),
       hampirMaks: nilaiDiBawah('Unit Hampir Maks Regrind', 0),
-      totalError: nilaiDiBawah('TOTAL ERROR (harus 0 sebelum dashboard dipercaya)', 0),
-      totalPeringatan: nilaiDiBawah('TOTAL PERINGATAN', 0),
+      totalError: totalError,
+      totalPeringatan: totalPeringatan,
     });
   } catch (e) {
     return gagal_(e.message);

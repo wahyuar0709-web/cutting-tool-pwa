@@ -28,6 +28,7 @@ const CONFIG = {
     M_ACTIVITY: 'Master Activity Type',
     M_STATUS: 'Master Status Code',
     M_CONFIG: 'Master Configuration',
+    MASTER_DATA_AUDIT: 'Master Data Audit',
 
     REQ: 'Regrind Requests',
     ORD: 'Regrind Orders',

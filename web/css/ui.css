@@ -4,6 +4,12 @@
 
 * { box-sizing: border-box; margin: 0; padding: 0; }
 
+/* Aturan .nav { display: flex } di bawah ini mengalahkan stylesheet bawaan
+   browser untuk atribut [hidden]. Tanpa baris ini, navigasi tetap terlihat
+   sebelum perannya diketahui — dan karena data-peran masih kosong, grid
+   berlapis satu kolom sehingga nav menutupi seluruh layar. */
+[hidden] { display: none !important; }
+
 html { -webkit-text-size-adjust: 100%; }
 
 body {
@@ -21,6 +27,9 @@ body {
 
 /* ---------------------------------------------------------------- kerangka */
 .rangka { display: grid; min-height: 100dvh; }
+/* Default sebelum peran diketahui: satu kolom, navigasi disembunyikan.
+   Aturan peran di bawah menimpa begitu boot() selesai. */
+.rangka:not([data-peran="ADMIN"]):not([data-peran="OPERATOR"]):not([data-peran="SPV"]) { grid-template-columns: 1fr; }
 .rangka[data-peran="OPERATOR"] { grid-template-columns: 1fr; }
 .rangka[data-peran="ADMIN"]    { grid-template-columns: 76px 1fr; }
 .rangka[data-peran="SPV"]     { grid-template-columns: 1fr; }

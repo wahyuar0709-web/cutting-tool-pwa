@@ -1,0 +1,753 @@
+{
+ "_catatan": "Data nyata dari spreadsheet, dibaca pada 2026-10-11 17:08 UTC. Dipakai mode pratinjau di GitHub Pages.",
+ "profil": {
+  "email": "pratinjau@contoh.local",
+  "nama": "Pratinjau PWA",
+  "peran": "ADMIN",
+  "plant": "RDJ-01",
+  "izin": [
+   "dashboard",
+   "stok",
+   "kartu",
+   "tiket.buat",
+   "tiket.lihat",
+   "tiket.verifikasi",
+   "order",
+   "movement",
+   "master",
+   "ekspor"
+  ]
+ },
+ "referensi": {
+  "tools": [
+   {
+    "kode": "AKE-SB-01",
+    "nama": "Saw blade AKE",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "AKE-SB-02",
+    "nama": "Saw Blade AKE",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "AKE-SB-03",
+    "nama": "Saw Blade AKE",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "AKE-SB-04",
+    "nama": "Saw Blade AKE",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "GUO-SB-01",
+    "nama": "Saw Blade GUO",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "HAU-SB-01",
+    "nama": "Saw Blade HAUPT",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "HAU-SB-02",
+    "nama": "Saw blade HAUPT",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "HAU-SB-03",
+    "nama": "Saw blade HAUPT",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "HAU-SB-04",
+    "nama": "Saw Blade HAUPT",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "HAU-SB-05",
+    "nama": "Saw Blade HAUPT",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "HAU-SB-06",
+    "nama": "Saw Blade HAUPT",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "HAU-SB-07",
+    "nama": "Saw Blade HAUPT",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "HAU-SB-08",
+    "nama": "Saw blade HAUPT",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "LEI-CT-01",
+    "nama": "Cutter LEITZ",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEI-SB-01",
+    "nama": "Saw blade LEITZ",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "LEI-SB-02",
+    "nama": "Saw blade LEITZ",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-01",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-02",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-03",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-04",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-05",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-06",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-07",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-08",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-09",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-10",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-11",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-13",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-14",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-15",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-16",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-17",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-18",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-19",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-20",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-22",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-25",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-26",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-27",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-28",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-29",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-30",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-31",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-32",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-33",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-34",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-35",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-36",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-37",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-39",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-40",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-41",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-42",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-43",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-44",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-45",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-46",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-47",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-48",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-49",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-50",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-SB-01",
+    "nama": "Saw Blade LEUCO",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-SB-02",
+    "nama": "Saw Blade LEUCO",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-SB-03",
+    "nama": "Saw Blade LEUCO",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-SB-04",
+    "nama": "Saw Blade LEUCO",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-SB-05",
+    "nama": "Saw Blade LEUCO",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-SB-06",
+    "nama": "Saw blade LEUCO",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-SB-24",
+    "nama": "Saw blade LEUCO",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "LUC-SB-01",
+    "nama": "Saw Blade LUCKGEM",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "LUC-SB-02",
+    "nama": "Saw Blade LUCKGEM",
+    "tipe": "Saw Blade",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-51",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   },
+   {
+    "kode": "LEU-CT-52",
+    "nama": "Cutter LEUCO",
+    "tipe": "Cutter",
+    "maks": 4
+   }
+  ],
+  "machines": [
+   {
+    "id": "RDS001",
+    "nama": ""
+   },
+   {
+    "id": "RDS002",
+    "nama": ""
+   },
+   {
+    "id": "RDS003",
+    "nama": ""
+   },
+   {
+    "id": "RDS004",
+    "nama": ""
+   },
+   {
+    "id": "RDS015",
+    "nama": ""
+   },
+   {
+    "id": "RDS017",
+    "nama": ""
+   },
+   {
+    "id": "RDS018",
+    "nama": ""
+   },
+   {
+    "id": "RDS019",
+    "nama": ""
+   },
+   {
+    "id": "RDS020",
+    "nama": ""
+   },
+   {
+    "id": "RDS021",
+    "nama": ""
+   },
+   {
+    "id": "RDS028",
+    "nama": ""
+   },
+   {
+    "id": "RDS030",
+    "nama": ""
+   },
+   {
+    "id": "RDS036",
+    "nama": ""
+   },
+   {
+    "id": "RDS038",
+    "nama": ""
+   },
+   {
+    "id": "RDS040",
+    "nama": ""
+   },
+   {
+    "id": "RDS041",
+    "nama": ""
+   },
+   {
+    "id": "RDS042",
+    "nama": ""
+   },
+   {
+    "id": "RDS043",
+    "nama": ""
+   }
+  ],
+  "vendors": [
+   {
+    "id": "V01",
+    "nama": "",
+    "aktif": true,
+    "sla": 0
+   },
+   {
+    "id": "V02",
+    "nama": "",
+    "aktif": false,
+    "sla": 0
+   },
+   {
+    "id": "V03",
+    "nama": "",
+    "aktif": false,
+    "sla": 0
+   },
+   {
+    "id": "V04",
+    "nama": "",
+    "aktif": true,
+    "sla": 0
+   }
+  ],
+  "kondisi": [
+   "TUMPUL",
+   "TAPIS",
+   "PATAH",
+   "KARAT"
+  ]
+ },
+ "dashboard": {
+  "badge": "BERSIH (0 error)",
+  "totalUnit": 536,
+  "siap": 381,
+  "dipakai": 59,
+  "menunggu": 32,
+  "diVendor": 64,
+  "perluCek": 0,
+  "habis": 7,
+  "kritis": 19,
+  "peringatan": 1,
+  "wajibScrap": 19,
+  "hampirMaks": 0,
+  "totalError": null,
+  "totalPeringatan": null
+ },
+ "kartu": {
+  "toolCode": "LEU-CT-11",
+  "total": 13,
+  "maks": 4,
+  "perStatus": {
+   "MENUNGGU ASAH": 2,
+   "DIPAKAI": 3,
+   "SIAP PAKAI": 6,
+   "DIASAH": 2
+  },
+  "units": [
+   {
+    "unitId": "LEU-CT-11-006",
+    "toolCode": "LEU-CT-11",
+    "status": "SIAP PAKAI",
+    "life": 7,
+    "regrind": 6,
+    "maks": 4,
+    "sisa": 0,
+    "flag": "WAJIB EVALUASI SCRAP",
+    "ident": ""
+   },
+   {
+    "unitId": "LEU-CT-11-004",
+    "toolCode": "LEU-CT-11",
+    "status": "SIAP PAKAI",
+    "life": 5,
+    "regrind": 4,
+    "maks": 4,
+    "sisa": 0,
+    "flag": "WAJIB EVALUASI SCRAP",
+    "ident": ""
+   },
+   {
+    "unitId": "LEU-CT-11-005",
+    "toolCode": "LEU-CT-11",
+    "status": "SIAP PAKAI",
+    "life": 5,
+    "regrind": 4,
+    "maks": 4,
+    "sisa": 0,
+    "flag": "WAJIB EVALUASI SCRAP",
+    "ident": ""
+   },
+   {
+    "unitId": "LEU-CT-11-008",
+    "toolCode": "LEU-CT-11",
+    "status": "SIAP PAKAI",
+    "life": 5,
+    "regrind": 4,
+    "maks": 4,
+    "sisa": 0,
+    "flag": "WAJIB EVALUASI SCRAP",
+    "ident": ""
+   },
+   {
+    "unitId": "LEU-CT-11-001",
+    "toolCode": "LEU-CT-11",
+    "status": "MENUNGGU ASAH",
+    "life": 3,
+    "regrind": 2,
+    "maks": 4,
+    "sisa": 2,
+    "flag": "",
+    "ident": "6.2221.00213501"
+   },
+   {
+    "unitId": "LEU-CT-11-002",
+    "toolCode": "LEU-CT-11",
+    "status": "DIPAKAI",
+    "life": 3,
+    "regrind": 2,
+    "maks": 4,
+    "sisa": 2,
+    "flag": "",
+    "ident": ""
+   },
+   {
+    "unitId": "LEU-CT-11-003",
+    "toolCode": "LEU-CT-11",
+    "status": "DIPAKAI",
+    "life": 3,
+    "regrind": 2,
+    "maks": 4,
+    "sisa": 2,
+    "flag": "",
+    "ident": ""
+   },
+   {
+    "unitId": "LEU-CT-11-007",
+    "toolCode": "LEU-CT-11",
+    "status": "SIAP PAKAI",
+    "life": 3,
+    "regrind": 2,
+    "maks": 4,
+    "sisa": 2,
+    "flag": "",
+    "ident": ""
+   },
+   {
+    "unitId": "LEU-CT-11-009",
+    "toolCode": "LEU-CT-11",
+    "status": "DIASAH",
+    "life": 1,
+    "regrind": 0,
+    "maks": 4,
+    "sisa": 4,
+    "flag": "",
+    "ident": ""
+   },
+   {
+    "unitId": "LEU-CT-11-010",
+    "toolCode": "LEU-CT-11",
+    "status": "DIASAH",
+    "life": 1,
+    "regrind": 0,
+    "maks": 4,
+    "sisa": 4,
+    "flag": "",
+    "ident": ""
+   },
+   {
+    "unitId": "LEU-CT-11-011",
+    "toolCode": "LEU-CT-11",
+    "status": "MENUNGGU ASAH",
+    "life": 1,
+    "regrind": 0,
+    "maks": 4,
+    "sisa": 4,
+    "flag": "",
+    "ident": "6.2221.00213501"
+   },
+   {
+    "unitId": "LEU-CT-11-012",
+    "toolCode": "LEU-CT-11",
+    "status": "DIPAKAI",
+    "life": 1,
+    "regrind": 0,
+    "maks": 4,
+    "sisa": 4,
+    "flag": "",
+    "ident": ""
+   },
+   {
+    "unitId": "LEU-CT-11-013",
+    "toolCode": "LEU-CT-11",
+    "status": "SIAP PAKAI",
+    "life": 1,
+    "regrind": 0,
+    "maks": 4,
+    "sisa": 4,
+    "flag": "",
+    "ident": ""
+   }
+  ]
+ },
+ "daftarTiket": [],
+ "healthCheck": {
+  "checked": "2026-10-11T17:08:09.441Z",
+  "sehat": false,
+  "masalah": [
+   "Dashboard masih melaporkan null galat"
+  ],
+  "ringkasan": {
+   "selError": [],
+   "badge": "BERSIH (0 error)",
+   "kapasitas": [],
+   "scrap": {
+    "total": 536,
+    "tanpaMaks": 536,
+    "negatif": 0
+   }
+  }
+ }
+}

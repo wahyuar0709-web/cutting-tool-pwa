@@ -17,10 +17,16 @@ const App = {
       return;
     }
 
+    // Di luar Apps Script (mis. GitHub Pages), data dibaca dari berkas
+    // pratinjau. Tandai dengan jelas supaya tidak tertukar dengan data nyata.
+    const pratinjau = !Api.tersambung();
     this.state.profil = r.data;
     document.getElementById('rangka').dataset.peran = r.data.peran;
     document.getElementById('saya').innerHTML =
-      `<span class="peran" data-p="${UI.esc(r.data.peran)}">${UI.esc(r.data.peran)}</span><b>${UI.esc(r.data.nama)}</b>`;
+      (pratinjau ? '<span class="peran" data-p="SPV">PRATINJAU</span>' : `<span class="peran" data-p="${UI.esc(r.data.peran)}">${UI.esc(r.data.peran)}</span>`) +
+      `<b>${UI.esc(pratinjau ? 'Data contoh' : r.data.nama)}</b>`;
+
+    if (pratinjau) document.body.classList.add('mode-pratinjau');
 
     // referensi dibutuhkan hampir semua layar
     const refs = await Api.referensi();

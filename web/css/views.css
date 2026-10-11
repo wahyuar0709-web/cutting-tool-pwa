@@ -4,6 +4,16 @@
 
 .kolom { min-width: 0; }
 
+/* ---- mode pratinjau: penanda yang tidak bisa tertukar dengan data nyata ---- */
+.mode-pratinjau .kepala { border-bottom: 2px dashed var(--dekat); }
+.mode-pratinjau .isi::before {
+  content: 'Mode pratinjau — data dibaca dari berkas, belum terhubung ke spreadsheet. Penulisan dinonaktifkan.';
+  display: block; margin-bottom: var(--s-4); padding: var(--s-2) var(--s-3);
+  background: var(--dekat-l); color: #6B4A00;
+  font-size: var(--s-12); border-left: 3px solid var(--dekat); border-radius: var(--r-md);
+}
+.mode-pratinjau .tombol.utama { opacity: .45; }
+
 /* ---------------------------------------------------------------- cari alat */
 .cari-baris { display: flex; gap: var(--s-2); margin-bottom: var(--s-3); }
 .cari-baris .input { flex: 1; }
