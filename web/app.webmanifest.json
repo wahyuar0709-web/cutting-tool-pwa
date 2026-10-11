@@ -1,0 +1,41 @@
+{
+  "name": "Monitoring Cutting Tool",
+  "short_name": "Cutting Tool",
+  "description": "Pelacakan alat potong: penggunaan, pengasahan, dan stok.",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#FFFFFF",
+  "theme_color": "#0B2E6F",
+  "lang": "id",
+  "dir": "ltr",
+  "categories": ["business", "productivity", "utilities"],
+  "icons": [
+    {
+      "src": "assets/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "assets/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Cari alat",
+      "short_name": "Alat",
+      "url": "./index.html#kartu"
+    },
+    {
+      "name": "Ajukan pengasahan",
+      "short_name": "Ajukan",
+      "url": "./index.html#ajukan",
+      "icons": [{ "src": "assets/icon-192.png", "sizes": "192x192" }]
+    }
+  ]
+}

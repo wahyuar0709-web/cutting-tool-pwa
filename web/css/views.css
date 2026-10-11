@@ -1,0 +1,85 @@
+/* ==========================================================================
+   views.css — hanya untuk komponen layar. Tata letak dasar ada di ui.css.
+   ========================================================================== */
+
+.kolom { min-width: 0; }
+
+/* ---------------------------------------------------------------- cari alat */
+.cari-baris { display: flex; gap: var(--s-2); margin-bottom: var(--s-3); }
+.cari-baris .input { flex: 1; }
+.cari-baris .tombol { white-space: nowrap; }
+@media (max-width: 520px) { .cari-baris { flex-direction: column; } }
+
+/* ---------------------------------------------------------------- kartu alat */
+.kartu-alat-kepala { display: grid; grid-template-columns: 1fr auto; gap: var(--s-5); align-items: start; }
+@media (max-width: 720px) { .kartu-alat-kepala { grid-template-columns: 1fr; gap: var(--s-4); } }
+
+.kartu-alat-label {
+  display: block; font-family: var(--f-display); font-size: var(--s-11); font-weight: 600;
+  text-transform: uppercase; letter-spacing: .08em; color: var(--tinta-3); margin-bottom: var(--s-1);
+}
+.kartu-alat-unit { font-family: var(--f-mono); font-size: var(--s-22); font-weight: 500; letter-spacing: .01em; display: block; }
+.kartu-alat-angka { font-family: var(--f-display); font-size: var(--s-44); font-weight: 700; line-height: 1; display: block; }
+.kartu-alat-samping { text-align: right; min-width: 150px; }
+.kartu-alat-status { margin-top: var(--s-2); display: flex; gap: var(--s-1); flex-wrap: wrap; justify-content: flex-end; }
+@media (max-width: 720px) { .kartu-alat-samping { text-align: left; } .kartu-alat-status { justify-content: flex-start; } }
+
+/* ---------------------------------------------------------------- skala nonius */
+.skala { display: block; border-radius: var(--r-md); padding: var(--s-2) var(--s-2) var(--s-1); }
+.skala svg { display: block; overflow: visible; }
+.skala-indeks { transition: transform 240ms cubic-bezier(.2, .7, .3, 1); }
+@media (prefers-reduced-motion: reduce) { .skala-indeks { transition: none; } }
+.skala-lurch {
+  display: block; margin-top: var(--s-1);
+  font-family: var(--f-display); font-size: var(--s-11); font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em; color: var(--tinta-2);
+}
+
+/* ---------------------------------------------------------------- metric ringkas */
+.kecil-kisi { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: var(--s-3); }
+.kecil {
+  padding: var(--s-3); border: 1px solid var(--garis); border-radius: var(--r-md);
+  border-left: 3px solid var(--garis-kuat); background: var(--lembar);
+}
+.kecil-label {
+  display: block; font-family: var(--f-display); font-size: var(--s-11); font-weight: 600;
+  text-transform: uppercase; letter-spacing: .07em; color: var(--tinta-2);
+}
+.kecil-nilai { display: block; font-family: var(--f-display); font-size: var(--s-30); font-weight: 700; line-height: 1.15; margin: 2px 0; }
+.kecil-nilai.aman     { color: var(--aman); }
+.kecil-nilai.perlu-perlu { color: var(--dekat); }
+.kecil-nilai.luar     { color: var(--luar); }
+.kecil-catatan { font-size: var(--s-12); color: var(--tinta-3); }
+.kecil.aman { border-left-color: var(--aman); }
+.kecil.perlu-perlu { border-left-color: var(--dekat); }
+.kecil.luar { border-left-color: var(--luar); }
+
+/* ---------------------------------------------------------------- form */
+.dua-kolom { display: grid; grid-template-columns: 1fr 140px; gap: var(--s-3); }
+@media (max-width: 520px) { .dua-kolom { grid-template-columns: 1fr; } }
+.opsional { color: var(--tinta-3); text-transform: none; letter-spacing: 0; font-weight: 400; }
+.redup { color: var(--tinta-3); }
+
+/* ---------------------------------------------------------------- toast */
+#toast {
+  position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px);
+  background: var(--tinta); color: #fff;
+  font-family: var(--f-display); font-size: var(--s-13); font-weight: 600; letter-spacing: .03em;
+  padding: var(--s-3) var(--s-4); border-radius: var(--r-md);
+  box-shadow: var(--bayang-lg);
+  opacity: 0; pointer-events: none;
+  transition: opacity 180ms, transform 180ms;
+  z-index: 50; max-width: calc(100vw - 32px); text-align: center;
+}
+#toast.tampil { opacity: 1; transform: translate(-50%, 0); }
+#toast.sukses { background: var(--aman); }
+#toast.gagal  { background: var(--luar); }
+
+/* ---------------------------------------------------------------- layar kecil */
+@media (max-width: 480px) {
+  .kepala { padding: var(--s-3); }
+  .kepala h1 { font-size: var(--s-18); }
+  .kepala .saya b { font-size: var(--s-11); }
+  .panel { padding: var(--s-3); }
+  .kartu-alat-angka { font-size: var(--s-30); }
+}

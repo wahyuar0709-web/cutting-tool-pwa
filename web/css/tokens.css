@@ -1,0 +1,66 @@
+/* ==========================================================================
+   tokens.css — sistem token. Semua keputusan warna & tipografi ada di sini.
+   Konsep: "Panel Instrumen". Warna hanya untuk status toleransi, bukan hiasan.
+   ========================================================================== */
+
+:root {
+  /* ---- Warna ---- */
+  --lembar:      #FFFFFF;  /* dasar: putih bersih, bukan krem */
+  --panel:       #EEF3FB;  /* badan instrumen */
+  --panel-2:     #E3EBF7;  /* panel tersedang */
+  --garis:       #C9D8EE;  /* garis hairline */
+  --garis-kuat:  #9DB8DC;
+
+  --tinta:       #0B2E6F;  /* biru pekat: teks utama */
+  --tinta-2:     #3A5793;  /* teks sekunder */
+  --tinta-3:     #7A90B8;  /* teks tersier */
+
+  --biru:        #1565F0;  /* aksi aktif */
+  --biru-gelap:  #0B47C4;
+  --buru:        #F2F6FC;  /* biru sangat muda */
+
+  /* Status toleransi — satu-satunya tempat warna status dipakai */
+  --aman:        #00897B;
+  --aman-l:      #E0F2EF;
+  --dekat:       #E8A020;
+  --dekat-l:     #FDF3DF;
+  --luar:        #D64545;
+  --luar-l:      #FBEAEA;
+
+  /* ---- Tipografi ----
+     IBM Plex Condensed  : display (label panel, angka)
+     IBM Plex Sans       : body
+     IBM Plex Mono       : data & identifier yang ditempa          */
+  --f-display: 'IBM Plex Sans Condensed', 'Arial Narrow', sans-serif;
+  --f-body:    'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --f-mono:    'IBM Plex Mono', 'SF Mono', Consolas, monospace;
+
+  --s-11: 11px;  --s-12: 12px;  --s-13: 13px;  --s-15: 15px;
+  --s-18: 18px;  --s-22: 22px;  --s-30: 30px;  --s-44: 44px;
+
+  --lh-body: 1.45;
+  --lh-tight: 1.15;
+
+  /* ---- Ruang ---- */
+  --r-sm: 3px;
+  --r-md: 6px;
+  --r-lg: 10px;
+  --s-1: 4px; --s-2: 8px; --s-3: 12px; --s-4: 16px;
+  --s-5: 24px; --s-6: 32px; --s-7: 48px;
+
+  --bayang: 0 1px 2px rgba(11, 46, 111, .06), 0 4px 12px rgba(11, 46, 111, .05);
+  --bayang-lg: 0 2px 6px rgba(11, 46, 111, .08), 0 12px 32px rgba(11, 46, 111, .10);
+
+  --fokus: 0 0 0 3px rgba(21, 101, 240, .38);
+  --geser: 180ms cubic-bezier(.2, .7, .3, 1);
+}
+
+/* prefers-reduced-motion: semua gerak hilang, tanpa kecuali */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: .01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: .01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

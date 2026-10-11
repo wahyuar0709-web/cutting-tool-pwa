@@ -1,0 +1,27 @@
+# dependensi
+node_modules/
+
+# konfigurasi lokal — jangan pernah di-commit
+.clasp.json
+.claspignore
+
+# kredensial (KEBERHASILAN JIKA MASUK REPO)
+*.token.json
+*-token.json
+client_secret*.json
+credentials*.json
+.env
+.env.*
+service-account*.json
+
+# alat & OS
+.DS_Store
+Thumbs.db
+*.swp
+.idea/
+.vscode/
+
+# hasil uji
+*.log
+verify-*.json
+grid-report.json
