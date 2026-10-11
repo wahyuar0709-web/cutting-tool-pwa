@@ -1,0 +1,52 @@
+# Deploy PWA ke GitHub Pages
+# Sumber situs: folder web/ pada branch main.
+name: Deploy ke GitHub Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'web/**'
+      - '.github/workflows/pages.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Ambil kode
+        uses: actions/checkout@v4
+
+      - name: Pastikan hanya isi web/ yang dipakai
+        run: |
+          test -f web/index.html || { echo "web/index.html tidak ada"; exit 1; }
+          echo "berkas yang akan dipublish:"
+          find web -type f | head -40
+
+      - name: Siapkan Pages
+        uses: actions/configure-pages@v5
+
+      - name: Unggah artefak
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './web'
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Publikasikan
+        id: deployment
+        uses: actions/deploy-pages@v4
