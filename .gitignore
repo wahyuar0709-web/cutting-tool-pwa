@@ -27,3 +27,4 @@ verify-*.json
 grid-report.json
 # pesan commit sementara (jangan pernah masuk repo)
 .commit-msg.txt
+.gitignore.tmp
