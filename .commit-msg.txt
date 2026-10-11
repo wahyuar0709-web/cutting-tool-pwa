@@ -1,3 +1,0 @@
-﻿docs: sertakan rencana PWA dan catatan migrasi ke dalam repo
-
-README menunjuk kedua dokumen ini; tanpa keduanya link-nya mati di GitHub.
