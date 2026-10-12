@@ -12,7 +12,7 @@
    ========================================================================== */
 
 const KONFIGURASI = {
-  API_URL: 'https://script.google.com/macros/s/AKfycbwfrkUuMw7JZbRY8xo6ezMYCNodnveDhEv7mz3MrvXt5FDAAunZ3mwKjoYa6FaZVQmF/exec',
+  API_URL: 'https://script.google.com/macros/s/AKfycbxTQl0cMTx48UUZegef2ZU3Rv4WYTc3FxWPgrUrQh8TidSoCkR_MqA92DKATaCeTHQM/exec',
 
 /**
    * Harus sama dengan BUILD di src/Config.gs.
@@ -21,7 +21,7 @@ const KONFIGURASI = {
    * Deployment Apps Script mengunci kode pada versi saat dibuat, jadi mendorong
    * kode baru tidak otomatis mengubah versi yang sedang hidup.
    */
-  BUILD_DIHARAPKAN: '2026-10-12-01',
+  BUILD_DIHARAPKAN: '2026-10-12-02',
 
   CLIENT_ID: '295783259439-da4h29qv4jual9kmth94gb1akv5jhb2j.apps.googleusercontent.com',
 

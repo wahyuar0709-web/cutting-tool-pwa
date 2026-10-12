@@ -8,7 +8,7 @@ const CONFIG = {
    * Aksi `ping` mengembalikannya, sehingga kita bisa memastikan versi mana
    * yang benar-benar hidup di deployment — tanpa menebak.
    */
-  BUILD: '2026-10-12-01',
+  BUILD: '2026-10-12-02',
 
   SPREADSHEET_ID: '1TQd2aUErMypDsrlbKaos1j8WHha_FqX5F7fXlgglhN0',
 

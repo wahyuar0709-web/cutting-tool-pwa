@@ -73,18 +73,22 @@ function doPost(e) {
     });
   }
 
-  // Diagnosis juga tanpa token: kebutuhan untuk melihat apakah sheet terbaca
-  // dan apakah UrlFetchApp sudah diotorisasi.
-  if (aksi === 'diagnostik') {
-    return json_(200, 'OK', api_diagnostik());
-  }
-
-  // The rest requires identity
+  // Semua aksi lain, TERMASUK diagnostik, wajib lewat verifikasi identitas lebih dulu.
   let profil;
   try {
     profil = identitasDariToken_(req.token);
   } catch (err) {
     return json_(401, 'Unauthorized', { pesan: err.message || 'Token is invalid.' });
+  }
+
+  // Diagnostik membocorkan Client ID, ID spreadsheet, dan daftar email pengguna.
+  // Dulu aksi ini terbuka tanpa token untuk menelusuri masalah awal; sekarang
+  // login sudah normal, jadi lubuknya ditutup: hanya ADMIN.
+  if (aksi === 'diagnostik') {
+    if (profil.peran !== 'ADMIN') {
+      return json_(403, 'Forbidden', { pesan: 'Diagnostik hanya bisa dipanggil oleh ADMIN.' });
+    }
+    return json_(200, 'OK', api_diagnostik());
   }
 
   try {

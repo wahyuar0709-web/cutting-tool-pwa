@@ -90,6 +90,49 @@ lap(/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(url 
 const clientId = ambil('CLIENT_ID');
 lap(clientId ? true : true, `CLIENT_ID: ${clientId ? clientId.slice(0, 24) + '…' : '(kosong -> mode pratinjau)'}`);
 
+// ---------- 5d. build frontend harus sama dengan build backend ----------
+console.log('\n[5d] Kecocokan build frontend <-> backend');
+const buildBackend = (fs.readFileSync(path.join(root, 'src', 'Config.gs'), 'utf8').match(/BUILD:\s*'([^']+)'/) || [])[1];
+const buildFrontend = (fs.readFileSync(path.join(root, 'web', 'js', 'konfigurasi.js'), 'utf8').match(/BUILD_DIHARAPKAN:\s*'([^']+)'/) || [])[1];
+if (!buildBackend || !buildFrontend) {
+  console.log('  PERIKSA nomor build tidak terbaca di Config.gs atau konfigurasi.js');
+  gagal++;
+} else {
+  const sama = buildBackend === buildFrontend;
+  lap(sama, sama
+    ? 'build sama di kedua sisi: ' + buildBackend
+    : 'build TIDAK sama - backend ' + buildBackend + ', frontend ' + buildFrontend
+      + '. Naikkan keduanya lalu deploy ulang.');
+}
+// ---------- 5c. keamanan: aksi sensitif harus di belakang verifikasi token ----------
+// Diagnostik sempat terbuka tanpa token dan membocorkan Client ID, ID spreadsheet,
+// serta daftar email pengguna. Aturan ini menjaga supaya tidak terulang.
+console.log('\n[5c] Keamanan: aksi di balik verifikasi identitas');
+const webGsKeamanan = fs.existsSync(path.join(root, 'src', 'Web.gs'))
+  ? fs.readFileSync(path.join(root, 'src', 'Web.gs'), 'utf8')
+  : null;
+if (!webGsKeamanan) {
+  console.log('  PERIKSA src/Web.gs tidak ditemukan');
+  gagal++;
+} else {
+  const isi = webGsKeamanan;
+  const diVerifikasi = isi.indexOf('identitasDariToken_(req.token)');
+  const aksiSensitif = [
+    ['diagnostik', "membocorkan Client ID, ID spreadsheet, dan email pengguna"],
+    ['whoami', 'mengembalikan identitas pengguna'],
+  ];
+  for (const [aksi, alasan] of aksiSensitif) {
+    const pos = isi.indexOf(`aksi === '${aksi}'`);
+    if (pos === -1) continue;
+    const ada = pos > diVerifikasi && diVerifikasi !== -1;
+    lap(ada, ada ? `'${aksi}' sudah di belakang verifikasi token` : `'${aksi}' TERBUKA tanpa token (${alasan})`);
+  }
+  // 'ping' justru HARUS tetap terbuka supaya frontend bisa cek koneksi tanpa login
+  const posPing = isi.indexOf("aksi === 'ping'");
+  const posVerifikasi = diVerifikasi;
+  lap(posPing !== -1 && (posVerifikasi === -1 || posPing < posVerifikasi), "'ping' tetap terbuka sebelum verifikasi token (benar untuk health check)");
+}
+
 // ---------- 6. karakter asing ----------
 console.log('\n[6] Karakter asing');
 let asing = 0;
