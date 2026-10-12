@@ -14,7 +14,7 @@
 const KONFIGURASI = {
   API_URL: 'https://script.google.com/macros/s/AKfycbwQnHFKF3M89o6Gpn6Pcz2T2MVbUL1eiIpIFqjiIAm7K7can9kdYO4paCeueFLG8z4i/exec',
 
-  CLIENT_ID: '',
+  CLIENT_ID: '295783259439-da4h29qv4jual9kmth94gb1akv5jhb2j.apps.googleusercontent.com',
 
   // Where the app is hosted; listed in Authorized JavaScript origins
   ASAL: 'https://wahyuar0709-web.github.io',

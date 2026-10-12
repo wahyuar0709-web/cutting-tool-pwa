@@ -6,11 +6,11 @@ const CONFIG = {
   SPREADSHEET_ID: '1TQd2aUErMypDsrlbKaos1j8WHha_FqX5F7fXlgglhN0',
 
   /**
-   * Client ID Google OAuth (Web application), dari Google Cloud Console.
-   * Wajib diisi supaya token ID dari frontend bisa diverifikasi.
-   * Kosongkan sementara kalau belum paham — verifikasi aud dilewati.
+   * Client ID Google OAuth. WAJIB sama dengan CLIENT_ID di
+   * web/js/konfigurasi.js — backend memverifikasi klaim `aud` pada token ID,
+   * jadi kalau tidak sama, semua permintaan ditolak "Token audience mismatch".
    */
-  CLIENT_ID: '',
+  CLIENT_ID: '295783259439-da4h29qv4jual9kmth94gb1akv5jhb2j.apps.googleusercontent.com',
 
   APP_NAME: 'Monitoring Cutting Tool',
   TIMEZONE: 'Asia/Jakarta',
