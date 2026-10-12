@@ -40,7 +40,7 @@ function renderSkala(wadah, o) {
   const nilai = Math.max(0, Number(o.nilai) || 0);
   const maks = Math.max(1, Number(o.maks) || 1);
   const lebar = o.lebar || 280;
-  const tinggi = 40;
+  const tinggi = 44;
   const padKiri = 4, padKanan = 4;
   const panjang = lebar - padKiri - padKanan;
   const st = status_(nilai, maks);
@@ -55,11 +55,21 @@ function renderSkala(wadah, o) {
   const tanda = [];
   for (let i = 0; i <= banyak; i++) {
     const tx = padKiri + (i / banyak) * panjang;
-    const tinggiTanda = i === Math.round((nilai / maks) * banyak) ? 12 : 8;
+    const tinggiTanda = 8;
     tanda.push(`<line x1="${tx.toFixed(1)}" y1="${tinggi - 8}" x2="${tx.toFixed(1)}" y2="${tinggi - 8 - tinggiTanda}" stroke="var(--garis-kuat)" stroke-width="1"/>`);
     if (maks <= 8) {
-      tanda.push(`<text x="${tx.toFixed(1)}" y="${tinggi - 22}" font-size="9" font-family="var(--f-mono)" fill="var(--tinta-3)" text-anchor="middle">${i}</text>`);
+      // Tanda yang akan tertutup penanda indeks diberi label lebih tinggi,
+      // supaya angka batas (mis. "4") tetap terbaca.
+      const tertutupi = Math.abs(i - nilai) < 0.55;
+      const dy = tertutupi ? 34 : 22;
+      tanda.push(`<text x="${tx.toFixed(1)}" y="${tinggi - dy}" font-size="9" font-family="var(--f-mono)" fill="${tertutupi ? WARNA[st] : 'var(--tinta-3)'}" text-anchor="${i === banyak ? 'end' : i === 0 ? 'start' : 'middle'}">${i}</text>`);
     }
+  }
+  // label "batas" di ujung kanan, ditulis miring supaya tidak bertabrakan
+  if (maks > 8) {
+    tanda.push(`<text x="${(padKiri + panjang).toFixed(1)}" y="10" font-size="9" font-family="var(--f-display)" fill="var(--luar)" text-anchor="end">batas ${maks}</text>`);
+  } else {
+    tanda.push(`<text x="${(padKiri + panjang).toFixed(1)}" y="10" font-size="9" font-family="var(--f-display)" fill="var(--luar)" text-anchor="end">batas</text>`);
   }
 
   wadah.innerHTML =

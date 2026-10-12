@@ -13,7 +13,7 @@
 const Api = (() => {
   let cachePratinjau = null;
 
-  async function dariPratinjau(aksi) {
+  async function dariPratinjau(aksi, argumen) {
     try {
       if (!cachePratinjau) {
         const r = await fetch('data/pratinjau.json', { cache: 'no-store' });
@@ -25,9 +25,24 @@ const Api = (() => {
         case 'whoami':      return { ok: true, data: d.profil };
         case 'referensi':   return { ok: true, data: d.referensi };
         case 'dashboard':   return { ok: true, data: d.dashboard };
-        case 'kartu':       return { ok: true, data: d.kartu };
         case 'daftarTiket': return { ok: true, data: d.daftarTiket || [] };
         case 'health':      return { ok: true, data: d.healthCheck };
+        case 'kartu': {
+          // PENTING: pakai kode yang diminta. Dulu berkas ini hanya berisi satu
+          // kartu, sehingga mengetik kode lain tetap menampilkan kartu yang sama
+          // — judulnya jadi tercampur (mis. "LEU-CT-11 · Saw blade LEITZ").
+          const kode = String((argumen && argumen.kode) || '').trim().toUpperCase();
+          const kartu = d.kartu || {};
+          const semua = Object.keys(kartu);
+          if (!kode) {
+            return { ok: false, pesan: 'Kode alat belum diisi.', detail: [] };
+          }
+          if (kartu[kode]) return { ok: true, data: kartu[kode] };
+          // toleransi kecil: pengguna mengetik "lei-sb-01" atau "LEI SB-01"
+          const mirip = semua.find((k) => k.toUpperCase().replace(/[^A-Z0-9]/g, '') === kode.replace(/[^A-Z0-9]/g, ''));
+          if (mirip) return { ok: true, data: kartu[mirip] };
+          return { ok: false, pesan: 'Alat ' + kode + ' belum punya unit terdaftar.', detail: [] };
+        }
         default:
           return { ok: false, pesan: 'Mode pratinjau hanya bisa dibaca.', detail: [] };
       }

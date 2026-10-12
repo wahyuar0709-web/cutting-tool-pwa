@@ -14,10 +14,13 @@ const Layar = {
     // alat pembuka: saw blade LEITZ 280X4/3X30_Z72 — unitnya sudah melewati batas asah,
     // jadi skala nonius langsung menunjukkan keadaan merah tanpa perlu menunggu.
     AWAL: 'LEI-SB-01',
-    async render(wadah, app) {
-      const kode = app.state.kartuKode || this.AWAL;
+async render(wadah, app) {
+      // Kalau belum ada pilihan pengguna, pakai alat pembuka. Kartu diambil
+      // sesuai kode yang diminta, jadi nama di judul selalu milik alat itu
+      // sendiri dan tidak pernah tercampur dengan yang diketik di kotak.
+      if (!app.state.kartuKode) app.state.kartuKode = this.AWAL;
+      const kode = app.state.kartuKode;
       const refs = app.cache.referensi;
-      const tool = refs ? refs.tools.find((t) => t.kode === kode) : null;
       const pilih = refs
         ? refs.tools.map((t) => `<option value="${UI.esc(t.kode)}"${t.kode === kode ? ' selected' : ''}>${UI.esc(t.kode)} — ${UI.esc(t.nama)}</option>`).join('')
         : '';
@@ -43,7 +46,7 @@ const Layar = {
         hasil.innerHTML = '<div class="kosong"><span class="memuat"></span></div>';
         const r = await Api.kartuAlat(kode);
         if (!r.ok) { hasil.innerHTML = UI.pesan(r); return; }
-        hasil.innerHTML = renderKartu(r.data, tool);
+        hasil.innerHTML = renderKartu(r.data);
         app.cache.kartu = r.data;
       }
 
@@ -242,8 +245,13 @@ const Layar = {
   },
 };
 
-/** Kartu alat + skala nonius. */
-function renderKartu(d, tool) {
+/**
+ * Kartu alat + skala nonius.
+ * Nama, tipe, dan spesifikasi diambil dari dzarida kartu itu sendiri —
+ * bukan dari kode yang diketik di kotak pencarian, supaya judulnya tidak
+ * pernah tercampur dengan alat lain.
+ */
+function renderKartu(d) {
   const perStatus = Object.entries(d.perStatus || {}).map(([k, v]) =>
     UI.lencana(`${k} · ${v}`, UI.kelasStatus(k))).join(' ');
 
@@ -257,10 +265,12 @@ function renderKartu(d, tool) {
     </tr>`).join('');
 
   const paling = d.units.reduce((a, u) => (u.regrind > (a?.regrind ?? -1) ? u : a), null);
-  const nama = tool ? tool.nama : '';
+  const nama = d.nama || '';
+  const ket = [d.tipe, d.spesifikasi].filter(Boolean).join(' · ');
 
   return `<section class="panel kartu-alat">
       <h2>${UI.esc(d.toolCode)}${nama ? ' · ' + UI.esc(nama) : ''}</h2>
+      ${ket ? `<p class="ket">${UI.esc(ket)}</p>` : ''}
       <div class="kartu-alat-kepala">
         <div class="kartu-alat-utama">
           <span class="kartu-alat-label">Unit dengan keausan tertinggi</span>
