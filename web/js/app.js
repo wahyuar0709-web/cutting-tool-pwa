@@ -10,6 +10,12 @@ const App = {
   async boot() {
     // Tanpa CLIENT_ID, aplikasi langsung masuk mode pratinjau.
     if (!KONFIGURASI.CLIENT_ID) { this.bootPratinjau(); return; }
+
+    // Cek versi backend dulu. Deployment Apps Script mengunci kode pada versi
+    // saat dibuat, jadi frontend bisa lebih baru daripada server -- atau
+    // sebaliknya. Lebih baik diberi tahu daripada gagal diam-diam.
+    await this.cekVersiBackend();
+
     await this.tampilkanMasuk();
 
     // Kalau masih ada token yang berlaku, langsung masuk tanpa mengganggu pengguna.
@@ -66,6 +72,28 @@ const App = {
     return r.data;
   },
 
+  /**
+ * Bandingkan BUILD backend dengan BUILD_DIHARAPKAN frontend.
+ * Mismatch berarti salah satu sisi belum diperbarui.
+ */
+  async cekVersiBackend() {
+    const p = await Api.periksaServer();
+    if (!p.ok) {
+      this.pesanVersi = 'Backend tidak terjangkau: ' + (p.pesan || '') + ' — aplikasi mungkin tidak bisa dipakai.';
+      return;
+    }
+    const build = p.data && p.data.build;
+    if (!build) {
+      this.pesanVersi = 'Backend masih menjalankan versi lama (tidak ada nomor build). '
+        + 'Deploy ulang web app di Apps Script: Deploy → Manage deployments → ikon pensil → New version → Deploy.';
+      return;
+    }
+    if (build !== KONFIGURASI.BUILD_DIHARAPKAN) {
+      this.pesanVersi = 'Versi tidak sama. Frontend punya ' + KONFIGURASI.BUILD_DIHARAPKAN
+        + ', backend punya ' + build + '. Deploy ulang web app di Apps Script.';
+    }
+  },
+
   /** Tampilkan layar masuk dengan tombol Google. */
   async tampilkanMasuk() {
     const el = document.getElementById('masuk');
@@ -85,6 +113,10 @@ const App = {
 
     const wadah = document.getElementById('wadah-google');
     Auth.pasangTombol(wadah);
+    if (this.pesanVersi) {
+      pesan.innerHTML = '<div class="pesan" style="border-left-color:var(--dekat);background:var(--dekat-l)">'
+        + UI.esc(this.pesanVersi) + '</div>';
+    }
     document.getElementById('ke-pratinjau').onclick = (e) => { e.preventDefault(); this.bootPratinjau(); };
     Auth.saatTokenBaru(async () => {
       const profil = await this.ambilProfil();

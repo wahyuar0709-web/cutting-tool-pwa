@@ -12,7 +12,16 @@
    ========================================================================== */
 
 const KONFIGURASI = {
-  API_URL: 'https://script.google.com/macros/s/AKfycbwQnHFKF3M89o6Gpn6Pcz2T2MVbUL1eiIpIFqjiIAm7K7can9kdYO4paCeueFLG8z4i/exec',
+  API_URL: 'https://script.google.com/macros/s/AKfycbwfrkUuMw7JZbRY8xo6ezMYCNodnveDhEv7mz3MrvXt5FDAAunZ3mwKjoYa6FaZVQmF/exec',
+
+/**
+   * Harus sama dengan BUILD di src/Config.gs.
+   * Frontend memanggil ping saat start; kalau build di server beda, aplikasi
+   * memberi tahu bahwa frontend perlu diperbarui, bukan diam-diam gagal.
+   * Deployment Apps Script mengunci kode pada versi saat dibuat, jadi mendorong
+   * kode baru tidak otomatis mengubah versi yang sedang hidup.
+   */
+  BUILD_DIHARAPKAN: '2026-10-12-01',
 
   CLIENT_ID: '295783259439-da4h29qv4jual9kmth94gb1akv5jhb2j.apps.googleusercontent.com',
 
