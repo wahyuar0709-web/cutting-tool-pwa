@@ -1,5 +1,5 @@
-/**
- * Util.gs — pembantu umum: sheet, header, kolom, tanggal, ID, locking.
+﻿/**
+ * Util.gs â€” pembantu umum: sheet, header, kolom, tanggal, ID, locking.
  */
 
 /** @return {GoogleAppsScript.Spreadsheet.Spreadsheet} */
@@ -33,8 +33,8 @@ function huruf_(n) {
 function header_(sheet) {
   const cache = CacheService.getScriptCache();
   const kunci = 'hdr:' + sheet.getSheetId();
-  constcached = cache.get(kunci);
-  if (cached) return JSON.parse(cached);
+  const tersimpan = cache.get(kunci);
+  if (tersimpan) return JSON.parse(tersimpan);
   const baris = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0] || [];
   const peta = {};
   baris.forEach((h, i) => { const n = String(h || '').trim(); if (n) peta[n] = i + 1; });
@@ -96,7 +96,7 @@ function hariIni_() {
   return new Date(f.format(new Date()) + 'T00:00:00');
 }
 
-/** Tanggal sebagai string YYYY-MM-DD (bukan objek Date — Sheet akan simpan sebagai teks). */
+/** Tanggal sebagai string YYYY-MM-DD (bukan objek Date â€” Sheet akan simpan sebagai teks). */
 function tgl_(d) {
   const x = d || hariIni_();
   const f = new Intl.DateTimeFormat('en-CA', { timeZone: CONFIG.TIMEZONE, year: 'numeric', month: '2-digit', day: '2-digit' });

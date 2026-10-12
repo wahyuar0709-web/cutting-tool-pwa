@@ -102,6 +102,48 @@ for (const f of ['web/index.html', 'web/css/tokens.css', 'web/css/ui.css', 'web/
 }
 lap(asing === 0, asing === 0 ? 'tidak ada karakter asing di seluruh project' : `${asing} berkas mengandung karakter asing`);
 
+// ---------- 6b. deklarasi tanpa spasi (constcached, letsaya) ----------
+// Ini kelas bug yang SUDAH MENIMPA beberapa kali: `const cached` ditulis
+// `constcached`, yang secara sintaks SAH (jadi lolos node --check) tapi
+// membuat variabel tak terRaFa Declared dan memicu ReferenceError saat jalan.
+console.log('\n[6b] Deklarasi tanpa spasi');
+const BERBAHAYA = /(^|[^\w$.])(const|let|var)[a-zA-Z_$][\w$]*\s*=[^=]/;
+let cacah = 0;
+const KATA_KUNCI = new Set(['if', 'for', 'while', 'switch', 'return', 'catch', 'typeof', 'new', 'await', 'async', 'function', 'const', 'let', 'var', 'delete', 'in', 'of', 'do', 'else', 'try', 'finally', 'throw', 'case', 'break', 'continue', 'class', 'import', 'export', 'instanceof', 'yield', 'static', 'get', 'set', 'with', 'void', 'debugger']);
+const semuaSrc = [];
+for (const f of js) semuaSrc.push({ f, t: fs.readFileSync(f, 'utf8') });
+for (const { f, t } of semuaSrc) {
+  t.split('\n').forEach((baris, i) => {
+    if (baris.trim().startsWith('*') || baris.trim().startsWith('//')) return;
+    if (BERBAHAYA.test(baris)) {
+      cacah++;
+      console.log(`  GAGAL ${path.relative(root, f)} baris ${i + 1}: ${baris.trim().slice(0, 70)}`);
+    }
+  });
+}
+lap(cacah === 0, cacah === 0 ? 'tidak ada deklarasi const/let/var tanpa spasi' : `${cacah} deklarasi bermasalah`);
+
+// ---------- 6c. identifier yang dipakai tapi tidak pernah dideklarasikan ----------
+// Menangkap "cached is not defined" lebih awal: cari nama yang dipakai
+// sebagai variabel tapi tak pernah muncul sebagai deklarasi di berkas itu.
+console.log('\n[6c] Identifier gantung');
+for (const { f, t } of semuaSrc) {
+  if (!f.endsWith('.gs')) continue;
+  const dideklarasi = new Set();
+  for (const m of t.matchAll(/\b(?:const|let|var|function|class)\s+([A-Za-z_$][\w$]*)/g)) dideklarasi.add(m[1]);
+  for (const m of t.matchAll(/(?:^|[^\w$.])([A-Za-z_$][\w$]*)\s*(?:=|\(|,|\)|;|\+\+)/gm)) {
+    const nama = m[1];
+    if (!/^(if|for|while|switch|return|catch|typeof|new|await|async|function|const|let|var|delete|in|of|do|else|try|finally|throw|case|break|continue|class|import|export|this|true|false|null|undefined|NaN)$/.test(nama)) dideklarasi.add(nama);
+  }
+  const builtin = new Set(['Math','JSON','Object','Array','String','Number','Boolean','Date','Map','Set','CacheService','LockService','Session','SpreadsheetApp','ContentService','HtmlService','PropertiesService','Logger','UrlFetchApp','Utilities','console','arguments','undefined','NaN','Infinity','Apps','Google','Xml','Html','Byte','Base64','install','require','module','process','globalThis','fetch','setTimeout','setInterval','clearTimeout','clearInterval','Promise','Error','TypeError','Response','Request','Headers','URL','URLSearchParams','Intl','Symbol','Proxy','Reflect','BigInt','parseInt','parseFloat','isNaN','encodeURIComponent','decodeURIComponent','TextEncoder','TextDecoder','self','caches','navigator','window','document','location','google','sessionStorage','localStorage','DOMParser','Blob','File','FileReader','FormData','CustomEvent','Event','Notification','matchMedia','history','screen','performance','crypto','structuredClone','queueMicrotask','reportError','WeakMap','WeakSet','Symbol']);
+  const dipakai = new Set([...t.matchAll(/(?:^|[^\w$.])([a-z][\w$]{2,})\s*\(/g)].map((m) => m[1]));
+  const gantung = [...dipakai].filter((n) => !dideklarasi.has(n) && !builtin.has(n) && !KATA_KUNCI.has(n));
+  if (gantung.length) {
+    console.log(`  PERIKSA ${path.relative(root, f)}: ${gantung.slice(0, 5).join(', ')}`);
+  }
+}
+lap(true, 'pemeriksaan identifier selesai');
+
 // ---------- 7. nilai yang tidak disengaja di CSS ----------
 console.log('\n[7] Token CSS');
 const tokens = fs.readFileSync(path.join(root, 'web/css/tokens.css'), 'utf8');
