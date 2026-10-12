@@ -258,6 +258,112 @@ for (const { f, t } of berkasKode) {
 }
 lap(jumlah6d === 0, jumlah6d === 0 ? 'tidak ada salah ketik identifier' : `${jumlah6d} kemungkinan salah ketik`);
 
+// ---------- 7b. kontras warna (WCAG) ----------
+// Audit UI/UX menemukan 8 pasangan gagal. Supaya tidak kembali, aturan ini
+// jadi gerbang: mengubah token warna tanpa mengecek kontras akan menggagalkan build.
+console.log('\n[7b] Kontras warna WCAG');
+const { periksaKontras } = await import('./kontras.mjs');
+const kontrasGagal = periksaKontras(root);
+for (const k of kontrasGagal) {
+  console.log(`  GAGAL ${k.rasio.toFixed(2)}:1 butuh ${k.kebutuh} — ${k.ket}  (${k.fg} di ${k.bg})`);
+}
+lap(kontrasGagal.length === 0,
+  kontrasGagal.length === 0 ? 'semua pasangan warna lolos WCAG AA' : `${kontrasGagal.length} pasangan warna tidak lolos`);
+
+// ---------- 8. aksesibilitas dasar ----------
+console.log('\n[8] Aksesibilitas dasar');
+const webDir = path.join(root, 'web');
+const semuaWeb = [];
+(function telusuri(d) {
+  for (const e of fs.readdirSync(d, { withFileTypes: true })) {
+    const p = path.join(d, e.name);
+    if (e.isDirectory()) telusuri(p);
+    else if (/\.(js|html)$/.test(e.name)) semuaWeb.push([p, fs.readFileSync(p, 'utf8')]);
+  }
+})(webDir);
+
+let a11yGagal = 0;
+const srcJs = semuaWeb.filter(([p]) => p.endsWith('.js')).map(([, t]) => t).join('\n');
+
+// 8a. setiap <th> punya scope
+const thTotal = (srcJs.match(/<th(?![a-z-])/g) || []).length;
+const thScope = (srcJs.match(/<th scope="col"/g) || []).length;
+lap(thTotal > 0 && thTotal === thScope,
+  thTotal === thScope ? `${thScope} header tabel punya scope="col"` : `${thTotal - thScope} dari ${thTotal} <th> tanpa scope`);
+
+// 8b. setiap <table> punya <caption>
+const tabelTotal = (srcJs.match(/<table/g) || []).length;
+const capTotal = (srcJs.match(/<caption/g) || []).length;
+lap(tabelTotal > 0 && tabelTotal === capTotal,
+  tabelTotal === capTotal ? `${capTotal} tabel punya <caption>` : `${tabelTotal - capTotal} dari ${tabelTotal} tabel tanpa <caption>`);
+
+// 8c. kelas screen-reader-only benar-benar ada
+const cssUi = fs.readFileSync(path.join(root, 'web', 'css', 'ui.css'), 'utf8');
+lap(/\.sr\s*\{/.test(cssUi) && /clip-path:\s*inset\(50%\)/.test(cssUi),
+  'kelas .sr (screen-reader only) terdefinisi');
+
+// 8d. tombol tidak boleh hanya ikon tanpa label teks
+const tombolIkonTanpaTeks = (srcJs.match(/<button[^>]*>\s*<svg[^>]*>\s*<\/svg>\s*<\/button>/g) || []).length;
+lap(tombolIkonTanpaTeks === 0, tombolIkonTanpaTeks === 0 ? 'tidak ada tombol ikon tanpa label' : `${tombolIkonTanpaTeks} tombol ikon tanpa label teks`);
+
+// 8e. teks kecil: var(--s-NN) harus dipecah dulu lewat tokens.css, lalu dicek >= 12px
+const cssToken = fs.readFileSync(path.join(root, 'web', 'css', 'tokens.css'), 'utf8');
+const ukuranToken = {};
+for (const m of cssToken.matchAll(/--s-(\d+):\s*(\d+)px/g)) ukuranToken[`s-${m[1]}`] = parseInt(m[2], 10);
+const cssSemua = ['ui.css', 'views.css'].map((f) => fs.readFileSync(path.join(root, 'web', 'css', f), 'utf8')).join('\n');
+const semuaUkuran = [];
+for (const m of cssSemua.matchAll(/font-size:\s*(var\(--([\w-]+)\)|(\d+)px)/g)) {
+  if (m[2]) semuaUkuran.push({ nama: m[2], px: ukuranToken[m[2]] });
+  else semuaUkuran.push({ nama: 'literal', px: parseInt(m[3], 10) });
+}
+const terkecil = semuaUkuran.filter((u) => Number.isFinite(u.px)).sort((a, b) => a.px - b.px)[0];
+const terlaluKecil = semuaUkuran.filter((u) => Number.isFinite(u.px) && u.px < 12);
+lap(terkecil && terlaluKecil.length === 0,
+  `${semuaUkuran.length} aturan font-size; yang terkecil ${terkecil ? terkecil.px + 'px (' + terkecil.nama + ')' : '-'}, Standar 12px`);
+
+// 8f. layar yang sedang dimuat perlu aria-busy
+lap(/aria-busy/.test(srcJs), 'aria-busy dipakai saat mengganti isi layar');
+
+// 8g. navigasi harus menghormati tombol back browser
+lap(/pushState/.test(srcJs) && /popstate/.test(srcJs), 'pushState + popstate terpasang (tombol back mengubah layar)');
+
+// 8h. track grid harus boleh menyusut, kalau tidak halaman meluber di HP
+// Terukur: dengan 1fr biasa, kolom konten menolak menyusut dan scrollWidth
+// jadi 603px pada viewport 485px. minmax(0, 1fr) yang memperbaikinya.
+const gridCss = fs.readFileSync(path.join(root, 'web', 'css', 'ui.css'), 'utf8');
+const trackBahaya = [];
+for (const m of gridCss.matchAll(/grid-template-columns:\s*([^;}]+)/g)) {
+  // buang bagian yang memang sudah aman: repeat(...) dan minmax(...)
+  const sisa = m[1].replace(/repeat\([^)]*\)/g, '').replace(/minmax\([^)]*\)/g, '');
+  // "fr" yang tidak preceded minmax/repeat = track dengan minimum min-content
+  if (/(?:^|[\s,])[\d.]*fr\b/.test(sisa)) trackBahaya.push(m[0].trim());
+}
+lap(trackBahaya.length === 0,
+  trackBahaya.length === 0
+    ? 'semua track grid bebas menyusut (tidak ada "fr" telanjang)'
+    : `${trackBahaya.length} track memakai fr telanjang: ${trackBahaya[0]}`);
+
+if (a11yGagal) gagal += a11yGagal;
+
+// 6a-2. mojibake: urutan byte UTF-8 yang salah baca sebagai cp1252.
+// Pernah terjadi: "—" (U+2014) tersimpan sebagai "a€\"" sehingga TEKS YANG
+// DIBACA PENGGUNA rusak, walau sintaksnya sah dan cek karakter asing lolos.
+const JEJAK_MOJIBAKE = ['â€”', 'â†’', 'â€œ', 'â€', 'Â ', 'Ã©', 'Ã¡'];
+// berkas ini sendiri memuat urutan tersebut sebagai daftar pola
+const KECUALIKAN_MOJIBAKE = new Set(['cek-semua.mjs', 'perbaiki-mojibake.mjs']);
+let jumlahMojibake = 0;
+for (const { f, t: isiBerkas } of semuaSrc) {
+  if (KECUALIKAN_MOJIBAKE.has(path.basename(f))) continue;
+  for (const j of JEJAK_MOJIBAKE) {
+    const n = isiBerkas.split(j).length - 1;
+    if (n) {
+      jumlahMojibake += n;
+      console.log(`  PERIKSA ${path.relative(root, f)}: ${n}x "${j}" (mojibake, bukan teks yang dimaksud)`);
+    }
+  }
+}
+lap(jumlahMojibake === 0, jumlahMojibake === 0 ? 'tidak ada mojibake di seluruh source' : `${jumlahMojibake} karakter mojibake`);
+
 // ---------- 7. nilai yang tidak disengaja di CSS ----------
 console.log('\n[7] Token CSS');
 const tokens = fs.readFileSync(path.join(root, 'web/css/tokens.css'), 'utf8');

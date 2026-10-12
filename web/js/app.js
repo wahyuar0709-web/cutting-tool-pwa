@@ -1,5 +1,5 @@
 /* ==========================================================================
-   app.js â€” pencemaran: muat profil, bangun navigasi sesuai peran, render layar.
+   app.js — pencemaran: muat profil, bangun navigasi sesuai peran, render layar.
    ========================================================================== */
 
 const App = {
@@ -10,6 +10,12 @@ const App = {
   async boot() {
     // Tanpa CLIENT_ID, aplikasi langsung masuk mode pratinjau.
     if (!KONFIGURASI.CLIENT_ID) { this.bootPratinjau(); return; }
+
+    // ?pratinjau=1 (atau #pratinjau) membuka mode contoh tanpa login.
+    // Dipakai untuk demo, pelatihan, dan pemeriksaan tampilan otomatis.
+    // Data pratinjau hanya baca, jadi tidak ada risiko menimpa data nyata.
+    const param = new URLSearchParams(location.search);
+    if (param.get('pratinjau') === '1' || location.hash === '#pratinjau') { this.bootPratinjau(); return; }
 
     // Cek versi backend dulu. Deployment Apps Script mengunci kode pada versi
     // saat dibuat, jadi frontend bisa lebih baru daripada server -- atau
@@ -50,7 +56,7 @@ const App = {
       const d = diag.data || {};
       const baris = [
         'CLIENT_ID terisi: ' + (d.clientIdTerisi ? 'ya' : 'TIDAK'),
-        'Sheet Master User terbaca: ' + (d.sheetTerbaca ? 'ya' : 'tidak') + ' â€” ' + (d.barisMasterUser || 0) + ' baris',
+        'Sheet Master User terbaca: ' + (d.sheetTerbaca ? 'ya' : 'tidak') + ' — ' + (d.barisMasterUser || 0) + ' baris',
         'Pengguna terdaftar: ' + ((d.pengguna || []).map((p) => `${p.email} (${p.peran}${p.aktif === 'Y' ? '' : ', nonaktif'})`).join(', ') || 'tidak ada'),
         'UrlFetchApp: ' + String(d.urlFetchApp || 'tidak diketahui'),
       ];
@@ -79,13 +85,13 @@ const App = {
   async cekVersiBackend() {
     const p = await Api.periksaServer();
     if (!p.ok) {
-      this.pesanVersi = 'Backend tidak terjangkau: ' + (p.pesan || '') + ' â€” aplikasi mungkin tidak bisa dipakai.';
+      this.pesanVersi = 'Backend tidak terjangkau: ' + (p.pesan || '') + ' — aplikasi mungkin tidak bisa dipakai.';
       return;
     }
     const build = p.data && p.data.build;
     if (!build) {
       this.pesanVersi = 'Backend masih menjalankan versi lama (tidak ada nomor build). '
-        + 'Deploy ulang web app di Apps Script: Deploy â†’ Manage deployments â†’ ikon pensil â†’ New version â†’ Deploy.';
+        + 'Deploy ulang web app di Apps Script: Deploy → Manage deployments → ikon pensil → New version → Deploy.';
       return;
     }
     if (build !== KONFIGURASI.BUILD_DIHARAPKAN) {
@@ -130,6 +136,10 @@ const App = {
 
   /** Mode pratinjau: data dari berkas, tanpa menulis. */
   async bootPratinjau() {
+    // Paksa Api memakai berkas pratinjau. Tanpa ini, CLIENT_ID yang terisi
+    // membuat Api menghubungi backend sungguhan tanpa token, dan layar
+    // tidak pernah selesai dimuat.
+    Api.aktifkanPratinjau(true);
     this.sembunyikanMasuk();
     document.getElementById('saya').innerHTML =
       '<span class="peran" data-p="SPV">PRATINJAU</span><b>Data contoh</b>';
@@ -141,7 +151,8 @@ const App = {
     document.getElementById('rangka').dataset.peran = 'ADMIN';
     this.bangunNav();
     const pertama = this.navTersedia()[0];
-    this.pergi(pertama ? pertama.kunci : 'ringkasan');
+    // navTersedia() mengembalikan pasangan [kunci, objek]; ambil indeks 0, bukan .kunci
+    this.pergi(pertama ? pertama[0] : Layar.UTAMA);
   },
 
   /** Mulai aplikasi setelah identitas diketahui. */
@@ -156,13 +167,15 @@ const App = {
 
     this.bangunNav();
     const pertama = this.navTersedia()[0];
-    this.pergi(pertama ? pertama.kunci : 'ringkasan');
+    // navTersedia() mengembalikan pasangan [kunci, objek]; ambil indeks 0, bukan .kunci
+    this.pergi(pertama ? pertama[0] : Layar.UTAMA);
   },
 
   /* ---------------------------------------------------------------- navigasi */
   navTersedia() {
     const peran = this.state.profil?.peran;
-    return Object.entries(Layar).filter(([, l]) => l.peran.includes(peran));
+    // Layar.UTAMA adalah string, bukan objek layar — jangan ikut jadi menu.
+    return Object.entries(Layar).filter(([, l]) => l && Array.isArray(l.peran) && l.peran.includes(peran));
   },
 
   bangunNav() {
@@ -180,13 +193,27 @@ const App = {
   },
 
   /* ---------------------------------------------------------------- render */
-  async pergi(kunci) {
+  /**
+   * Pindah layar.
+   * dariRiwayat = true kalau pemicuannya tombol back browser. Tanpa begitu,
+   * tiap back akan menambah satu entri baru dan pengguna tidak bisa keluar.
+   */
+  async pergi(kunci, dariRiwayat) {
     const layar = Layar[kunci];
     if (!layar) return;
     if (!layar.peran.includes(this.state.profil?.peran)) {
       this.toast('Peran ' + (this.state.profil?.peran || '') + ' tidak punya akses ke layar ini.');
       return;
     }
+
+    // Rekam layar sekarang agar tombol back punya titik awal yang jelas.
+    if (!dariRiwayat) {
+      try {
+        const url = kunci === Layar.UTAMA ? location.pathname + location.search : '#' + kunci;
+        history.pushState({ layar: kunci }, '', url);
+      } catch { /* riwayat browser tidak tersedia; navigasi tetap jalan */ }
+    }
+
     this.state.layar = kunci;
     document.getElementById('judul').textContent = layar.judul;
 
@@ -196,12 +223,15 @@ const App = {
     });
 
     const isi = document.getElementById('isi');
+    // aria-busy memberi tahu pembaca layar bahwa isinya sedang diganti.
+    isi.setAttribute('aria-busy', 'true');
     isi.innerHTML = '<div class="kosong"><span class="memuat"></span></div>';
     try {
       await layar.render(isi, this);
     } catch (e) {
       isi.innerHTML = `<div class="pesan gagal">${UI.esc(e.message || 'Layar gagal dimuat.')}</div>`;
     }
+    isi.removeAttribute('aria-busy');
 
     // skala nonius digambar setelah DOM siap
     if (kunci === 'kartu' && this.cache.kartu) {
@@ -215,6 +245,13 @@ const App = {
     }
 
     window.scrollTo({ top: 0, behavior: 'auto' });
+
+    // Fokus pindah ke konten: pembaca layar/Linux perlu tahu layarnya berubah,
+    // dan pengguna keyboard tidak boleh terjebak di navigasi.
+    // Jangan dilakukan pada render pertama — melompat fokus begitu halaman
+    // terbuka justru membingungkan.
+    if (this.sudahNavigasi) isi.focus({ preventScroll: true });
+    this.sudahNavigasi = true;
   },
 
   render() { return this.pergi(this.state.layar); },
@@ -226,6 +263,21 @@ document.addEventListener('DOMContentLoaded', () => {
   pasangPenangkapKesalahan();
   watchdog();
   App.boot();
+
+  // Tombol back / maju browser harus memindahkan layar, bukan mengeluarkan
+  // pengguna dari aplikasi di tengah pekerjaan.
+  window.addEventListener('popstate', (e) => {
+    const kunci = (e.state && e.state.layar) || Layar.UTAMA;
+    if (App.state.profil) App.pergi(kunci, true);
+  });
+
+  // Buka langsung ke layar tertentu lewat #kartu, #ringkasan, dan sejenisnya.
+  const dariHash = (location.hash || '').replace('#', '');
+  if (Layar[dariHash]) {
+    App.pergi(dariHash, true);
+  } else {
+    try { history.replaceState({ layar: Layar.UTAMA }, '', location.pathname + location.search); } catch { /* abaikan */ }
+  }
 });
 
 /**
@@ -259,7 +311,7 @@ function pasangPenangkapKesalahan() {
   };
 
   window.addEventListener('error', (e) => {
-    tampilkan('Ada kesalahan di halaman', (e.message || 'Kesalahan tidak dikenal') + ' â€” ' + (e.filename || '') + ' baris ' + (e.lineno || '?'));
+    tampilkan('Ada kesalahan di halaman', (e.message || 'Kesalahan tidak dikenal') + ' — ' + (e.filename || '') + ' baris ' + (e.lineno || '?'));
   });
 
   window.addEventListener('unhandledrejection', (e) => {

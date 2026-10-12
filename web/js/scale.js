@@ -39,7 +39,11 @@ const WARNA_LATAR = { aman: 'var(--aman-l)', dekat: 'var(--dekat-l)', luar: 'var
 function renderSkala(wadah, o) {
   const nilai = Math.max(0, Number(o.nilai) || 0);
   const maks = Math.max(1, Number(o.maks) || 1);
-  const lebar = o.lebar || 280;
+  // Lebar digambar mengikuti lebar wadah yang sebenarnya. Kalau viewBox tetap
+  // dan SVG dipaksa jadi width:100% dengan preserveAspectRatio="none", teks
+  // ikut teregang saat wadah lebar -- angka tanda jadi berjarak ganjil.
+  const terukur = Math.round(wadah.clientWidth || 0);
+  const lebar = o.lebar || (terukur > 80 ? terukur : 280);
   const tinggi = 44;
   const padKiri = 4, padKanan = 4;
   const panjang = lebar - padKiri - padKanan;
@@ -65,16 +69,18 @@ function renderSkala(wadah, o) {
       tanda.push(`<text x="${tx.toFixed(1)}" y="${tinggi - dy}" font-size="9" font-family="var(--f-mono)" fill="${tertutupi ? WARNA[st] : 'var(--tinta-3)'}" text-anchor="${i === banyak ? 'end' : i === 0 ? 'start' : 'middle'}">${i}</text>`);
     }
   }
-  // label "batas" di ujung kanan, ditulis miring supaya tidak bertabrakan
-  if (maks > 8) {
-    tanda.push(`<text x="${(padKiri + panjang).toFixed(1)}" y="10" font-size="9" font-family="var(--f-display)" fill="var(--luar)" text-anchor="end">batas ${maks}</text>`);
+// Label "batas" di ujung kanan. Text-anchor="end" berarti teks BERAKHIR
+// tepat pada garis batas, sehingga huruf terakhir tertimpa garis putus.
+// Beri jarak 6px ke kiri supaya tidak bertabrakan.
+if (maks > 8) {
+    tanda.push(`<text x="${(padKiri + panjang - 6).toFixed(1)}" y="10" font-size="9" font-family="var(--f-display)" fill="var(--luar)" text-anchor="end">batas ${maks}</text>`);
   } else {
-    tanda.push(`<text x="${(padKiri + panjang).toFixed(1)}" y="10" font-size="9" font-family="var(--f-display)" fill="var(--luar)" text-anchor="end">batas</text>`);
+    tanda.push(`<text x="${(padKiri + panjang - 6).toFixed(1)}" y="10" font-size="9" font-family="var(--f-display)" fill="var(--luar)" text-anchor="end">batas</text>`);
   }
 
   wadah.innerHTML =
     `<div class="skala" style="background:${WARNA_LATAR[st]}">` +
-      `<svg viewBox="0 0 ${lebar} ${tinggi}" width="100%" height="${tinggi}" role="img" aria-label="${lurch.replace(/"/g, '&quot;')}" preserveAspectRatio="none">` +
+      `<svg viewBox="0 0 ${lebar} ${tinggi}" width="${lebar}" height="${tinggi}" role="img" aria-label="${lurch.replace(/"/g, '&quot;')}">` +
         `<line x1="${padKiri}" y1="${tinggi - 8}" x2="${lebar - padKanan}" y2="${tinggi - 8}" stroke="var(--garis)" stroke-width="1"/>` +
         tanda.join('') +
         // penanda batas: garis putus-putus di posisi maksimal

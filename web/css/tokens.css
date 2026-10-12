@@ -13,18 +13,21 @@
 
   --tinta:       #0B2E6F;  /* biru pekat: teks utama */
   --tinta-2:     #3A5793;  /* teks sekunder */
-  --tinta-3:     #7A90B8;  /* teks tersier */
+  --tinta-3:     #5D6D8C;  /* teks tersier - digelapkan dari #7A90B8 supaya kontras >= 4.5:1 */
 
   --biru:        #1565F0;  /* aksi aktif */
   --biru-gelap:  #0B47C4;
   --buru:        #F2F6FC;  /* biru sangat muda */
 
-  /* Status toleransi — satu-satunya tempat warna status dipakai */
-  --aman:        #00897B;
+  /* Status toleransi — satu-satunya tempat warna status dipakai.
+     Nilai solid (aman/dekat/luar) dipakai untuk garis, titik, dan isian.
+     Untuk TEKS di atas isian pucat, pakai varian -teks-nya. */
+  --aman:        #00796D;
   --aman-l:      #E0F2EF;
-  --dekat:       #E8A020;
+  --dekat:       #E8A020;  /* hanya isian & garis - jangan untuk teks */
+  --dekat-teks:  #8A5D00;  /* teks di atas --dekat-l dan angka besar */
   --dekat-l:     #FDF3DF;
-  --luar:        #D64545;
+  --luar:        #BD3D3D;
   --luar-l:      #FBEAEA;
 
   /* ---- Tipografi ----
@@ -35,8 +38,8 @@
   --f-body:    'IBM Plex Sans', system-ui, -apple-system, 'Segoe UI', sans-serif;
   --f-mono:    'IBM Plex Mono', 'SF Mono', Consolas, monospace;
 
-  --s-11: 11px;  --s-12: 12px;  --s-13: 13px;  --s-15: 15px;
-  --s-18: 18px;  --s-22: 22px;  --s-30: 30px;  --s-44: 44px;
+  --s-11: 11px;  --s-12: 12px;  --s-13: 13px;  --s-14: 14px;
+  --s-15: 15px;  --s-18: 18px;  --s-22: 22px;  --s-30: 30px;  --s-44: 44px;
 
   --lh-body: 1.45;
   --lh-tight: 1.15;

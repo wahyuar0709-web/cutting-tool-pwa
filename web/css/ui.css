@@ -14,7 +14,7 @@ html { -webkit-text-size-adjust: 100%; }
 
 body {
   font-family: var(--f-body);
-  font-size: var(--s-13);
+  font-size: var(--s-14);
   line-height: var(--lh-body);
   color: var(--tinta);
   background: var(--lembar);
@@ -28,11 +28,14 @@ body {
 /* ---------------------------------------------------------------- kerangka */
 .rangka { display: grid; min-height: 100dvh; }
 /* Default sebelum peran diketahui: satu kolom, navigasi disembunyikan.
-   Aturan peran di bawah menimpa begitu boot() selesai. */
-.rangka:not([data-peran="ADMIN"]):not([data-peran="OPERATOR"]):not([data-peran="SPV"]) { grid-template-columns: 1fr; }
-.rangka[data-peran="OPERATOR"] { grid-template-columns: 1fr; }
-.rangka[data-peran="ADMIN"]    { grid-template-columns: 76px 1fr; }
-.rangka[data-peran="SPV"]     { grid-template-columns: 1fr; }
+   Aturan peran di bawah menimpa begitu boot() selesai.
+   minmax(0, ...) WAJIB: track 1fr biasa memakai minimum min-content, sehingga
+   kolom konten menolak menyusut di layar sempit dan seluruh halaman meluber
+   ke kanan. */
+.rangka:not([data-peran="ADMIN"]):not([data-peran="OPERATOR"]):not([data-peran="SPV"]) { grid-template-columns: minmax(0, 1fr); }
+.rangka[data-peran="OPERATOR"] { grid-template-columns: minmax(0, 1fr); }
+.rangka[data-peran="ADMIN"]    { grid-template-columns: 88px minmax(0, 1fr); }
+.rangka[data-peran="SPV"]     { grid-template-columns: minmax(0, 1fr); }
 
 /* ---------------------------------------------------------------- navigasi */
 .nav {
@@ -47,20 +50,28 @@ body {
 }
 .nav-judul {
   font-family: var(--f-display);
-  font-size: var(--s-13); font-weight: 700; letter-spacing: .1em;
+  font-size: var(--s-15); font-weight: 700; letter-spacing: .1em;
   writing-mode: vertical-rl; transform: rotate(180deg);
   color: #7FA8E8; margin-bottom: var(--s-4);
 }
 .nav-item {
-  width: 52px; padding: var(--s-2) 0;
+  width: 64px; min-height: 56px; padding: var(--s-2) var(--s-1);
   display: grid; place-items: center; gap: 2px;
-  font-family: var(--f-display); font-size: var(--s-11); letter-spacing: .04em;
+  font-family: var(--f-display); font-size: var(--s-12); letter-spacing: .02em;
   color: #B9CDF0; background: none; border: 0; border-radius: var(--r-md);
   cursor: pointer; transition: background var(--geser), color var(--geser);
 }
 .nav-item svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.6; }
 .nav-item:hover { background: rgba(255,255,255,.09); color: #fff; }
 .nav-item[aria-current="page"] { background: var(--biru); color: #fff; }
+
+/* Layar kecil: rel 88px memakan hampir seperempat lebar HP. Cukup dikecilkan
+   saja; memindahkan ke bawah bukan pilihan karena isi sudah tidak muat. */
+@media (max-width: 560px) {
+  .rangka[data-peran="ADMIN"] { grid-template-columns: 64px minmax(0, 1fr); }
+  .nav-item { width: 56px; }
+  .nav-judul { font-size: var(--s-12); }
+}
 
 /* ---------------------------------------------------------------- kepala */
 .kepala {
@@ -75,11 +86,11 @@ body {
   text-transform: uppercase; letter-spacing: .01em; line-height: var(--lh-tight);
 }
 .kepala .sp { flex: 1; }
-.kepala .saya { font-size: var(--s-12); color: var(--tinta-2); text-align: right; }
+.kepala .saya { font-size: var(--s-13); color: var(--tinta-2); text-align: right; }
 .kepala .saya b { display: block; font-weight: 600; color: var(--tinta); }
 
 /* ---------------------------------------------------------------- isi */
-.isi { padding: var(--s-5); max-width: 1400px; }
+.isi { padding: var(--s-5); max-width: 1400px; min-width: 0; }
 @media (max-width: 720px) { .isi { padding: var(--s-3); } }
 
 /* ---------------------------------------------------------------- panel */
@@ -102,7 +113,7 @@ body {
 
 /* ---------------------------------------------------------------- label & form */
 .label {
-  display: block; font-family: var(--f-display); font-size: var(--s-12);
+  display: block; font-family: var(--f-display); font-size: var(--s-13);
   font-weight: 600; text-transform: uppercase; letter-spacing: .06em;
   color: var(--tinta-2); margin-bottom: var(--s-1);
 }
@@ -124,7 +135,7 @@ body {
 .tombol {
   font-family: var(--f-display); font-size: var(--s-13); font-weight: 600;
   letter-spacing: .03em; text-transform: uppercase;
-  padding: var(--s-2) var(--s-4);
+  padding: var(--s-3) var(--s-4);
   border: 1px solid var(--garis-kuat); border-radius: var(--r-md);
   background: var(--lembar); color: var(--tinta);
   cursor: pointer; transition: background var(--geser), border-color var(--geser), transform var(--geser);
@@ -139,21 +150,21 @@ body {
 /* ---------------------------------------------------------------- lencana status */
 .lencana {
   display: inline-flex; align-items: center; gap: 5px;
-  font-family: var(--f-display); font-size: var(--s-11); font-weight: 600;
+  font-family: var(--f-display); font-size: var(--s-12); font-weight: 600;
   text-transform: uppercase; letter-spacing: .05em;
   padding: 2px var(--s-2); border-radius: 999px; white-space: nowrap;
 }
 .lencana::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
 .lencana.aman  { background: var(--aman-l);  color: var(--aman); }
-.lencana.dekat { background: var(--dekat-l); color: #8A5D00; }
+.lencana.dekat { background: var(--dekat-l); color: var(--dekat-teks); }
 .lencana.luar  { background: var(--luar-l);  color: var(--luar); }
 .lencana.info  { background: var(--buru);    color: var(--biru); }
 
 /* ---------------------------------------------------------------- tabel */
 .tabel-gulir { overflow-x: auto; margin: 0 calc(var(--s-4) * -1); padding: 0 var(--s-4); }
-table { width: 100%; border-collapse: collapse; font-size: var(--s-12); }
+table { width: 100%; border-collapse: collapse; font-size: var(--s-13); }
 th {
-  text-align: left; font-family: var(--f-display); font-size: var(--s-11); font-weight: 600;
+  text-align: left; font-family: var(--f-display); font-size: var(--s-12); font-weight: 600;
   text-transform: uppercase; letter-spacing: .07em; color: var(--tinta-2);
   padding: var(--s-2) var(--s-2); border-bottom: 1px solid var(--garis-kuat);
   white-space: nowrap;
@@ -166,7 +177,7 @@ td.mono, th.mono { font-family: var(--f-mono); }
 .pesan {
   padding: var(--s-3); border-radius: var(--r-md);
   border-left: 3px solid var(--garis-kuat); background: var(--panel);
-  font-size: var(--s-12); margin-bottom: var(--s-3);
+  font-size: var(--s-13); margin-bottom: var(--s-3);
 }
 .pesan.gagal { border-left-color: var(--luar); background: var(--luar-l); }
 .pesan.sukses { border-left-color: var(--aman); background: var(--aman-l); }
@@ -181,7 +192,7 @@ td.mono, th.mono { font-family: var(--f-mono); }
 
 /* ---------------------------------------------------------------- lencana peran */
 .peran {
-  font-family: var(--f-display); font-size: var(--s-11); font-weight: 600;
+  font-family: var(--f-display); font-size: var(--s-12); font-weight: 600;
   text-transform: uppercase; letter-spacing: .08em;
   padding: 2px var(--s-2); border-radius: var(--r-sm);
   background: var(--tinta); color: #fff;
@@ -196,3 +207,12 @@ td.mono, th.mono { font-family: var(--f-mono); }
   border-radius: 0 0 var(--r-md) 0; z-index: 99;
 }
 .lompat:focus { left: 0; top: 0; }
+
+/* Hanya untuk pembaca layar: hilang dari tampilan, tetap terbaca.
+   Dipakai untuk <caption> tabel dan pengumuman perubahan layar. */
+.sr {
+  position: absolute; width: 1px; height: 1px;
+  margin: -1px; padding: 0; border: 0;
+  overflow: hidden; white-space: nowrap;
+  clip: rect(0 0 0 0); clip-path: inset(50%);
+}

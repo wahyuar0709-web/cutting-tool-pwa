@@ -89,6 +89,14 @@ const Api = (() => {
     };
   }
 
+// Mode pratinjau harus dipaksa, bukanditentukan oleh CLIENT_ID.
+// Kalau hanya mengandalkan Auth.bisaMasuk(), pratinjau akan mencoba
+//Rumusan: CLIENT_ID terisi -> dab_fetch ke backend sungguhan tanpa token -> gagal.
+let modePratinjau = false;
+
+/** Dipanggil sekali oleh App.bootPratinjau(). */
+function aktifkanPratinjau(nilai) { modePratinjau = !!nilai; }
+
 async function panggil(aksi, argumen) {
     // Inside the Apps Script editor itself there are the api_* functions.
     if (typeof api_whoami === 'function') {
@@ -104,8 +112,10 @@ async function panggil(aksi, argumen) {
         return { ok: false, pesan: String(e.message || e), detail: [] };
       }
     }
-    if (Auth.bisaMasuk() || Auth.sudahMasuk) return dariHttp(aksi, argumen);
-    return dariPratinjau(aksi);
+    if (!modePratinjau && (Auth.bisaMasuk() || Auth.sudahMasuk)) return dariHttp(aksi, argumen);
+    // argumen WAJIB diteruskan. Tanpa ini, kartuAlat('LEI-SB-01') tiba di
+    // pratinjau tanpa kode dan selalu berakhir "Kode alat belum diisi."
+    return dariPratinjau(aksi, argumen);
   }
 
   /** Cek apakah backend bisa dihubungi, tanpa perlu token. */
@@ -135,6 +145,7 @@ async function panggil(aksi, argumen) {
     daftarTiket: (f) => panggil('daftarTiket', { filter: f }),
     catatMovement: (m) => panggil('movement', { movement: m }),
     healthCheck: () => panggil('health'),
+    aktifkanPratinjau,
   };
 })();
 

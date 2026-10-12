@@ -1,5 +1,5 @@
 /**
- * Util.gs â€” pembantu umum: sheet, header, kolom, tanggal, ID, locking.
+ * Util.gs — pembantu umum: sheet, header, kolom, tanggal, ID, locking.
  */
 
 /** @return {GoogleAppsScript.Spreadsheet.Spreadsheet} */
@@ -100,7 +100,7 @@ function hariIni_() {
   return new Date(f.format(new Date()) + 'T00:00:00');
 }
 
-/** Tanggal sebagai string YYYY-MM-DD (bukan objek Date â€” Sheet akan simpan sebagai teks). */
+/** Tanggal sebagai string YYYY-MM-DD (bukan objek Date — Sheet akan simpan sebagai teks). */
 function tgl_(d) {
   const x = d || hariIni_();
   const f = new Intl.DateTimeFormat('en-CA', { timeZone: CONFIG.TIMEZONE, year: 'numeric', month: '2-digit', day: '2-digit' });

@@ -26,8 +26,8 @@
 .mode-pratinjau .isi::before {
   content: 'Mode pratinjau — data dibaca dari berkas, belum terhubung ke spreadsheet. Penulisan dinonaktifkan.';
   display: block; margin-bottom: var(--s-4); padding: var(--s-2) var(--s-3);
-  background: var(--dekat-l); color: #6B4A00;
-  font-size: var(--s-12); border-left: 3px solid var(--dekat); border-radius: var(--r-md);
+  background: var(--dekat-l); color: var(--dekat-teks);
+  font-size: var(--s-13); border-left: 3px solid var(--dekat); border-radius: var(--r-md);
 }
 .mode-pratinjau .tombol.utama { opacity: .45; }
 
@@ -39,17 +39,22 @@
 
 /* ---------------------------------------------------------------- kartu alat */
 .kartu-alat-kepala { display: grid; grid-template-columns: 1fr auto; gap: var(--s-5); align-items: start; }
-@media (max-width: 720px) { .kartu-alat-kepala { grid-template-columns: 1fr; gap: var(--s-4); } }
+/* Dua kolom hanya bila memang ada ruang. Di bawah 1040px, badge status
+   (yang lebarnya mengikuti isi) memakan hampir seluruh baris sehingga
+   skala nonius tersisa sekitar 250px. Lebih baik ditumpuk. */
+
+@media (max-width: 1040px) { .kartu-alat-kepala { grid-template-columns: 1fr; gap: var(--s-4); } }
+.kartu-alat-utama { min-width: 0; }
 
 .kartu-alat-label {
-  display: block; font-family: var(--f-display); font-size: var(--s-11); font-weight: 600;
-  text-transform: uppercase; letter-spacing: .08em; color: var(--tinta-3); margin-bottom: var(--s-1);
+  display: block; font-family: var(--f-display); font-size: var(--s-12); font-weight: 600;
+  text-transform: uppercase; letter-spacing: .06em; color: var(--tinta-3); margin-bottom: var(--s-1);
 }
 .kartu-alat-unit { font-family: var(--f-mono); font-size: var(--s-22); font-weight: 500; letter-spacing: .01em; display: block; }
 .kartu-alat-angka { font-family: var(--f-display); font-size: var(--s-44); font-weight: 700; line-height: 1; display: block; }
-.kartu-alat-samping { text-align: right; min-width: 150px; }
+.kartu-alat-samping { text-align: right; min-width: 150px; max-width: 280px; }
 .kartu-alat-status { margin-top: var(--s-2); display: flex; gap: var(--s-1); flex-wrap: wrap; justify-content: flex-end; }
-@media (max-width: 720px) { .kartu-alat-samping { text-align: left; } .kartu-alat-status { justify-content: flex-start; } }
+@media (max-width: 1040px) { .kartu-alat-samping { text-align: left; max-width: none; } .kartu-alat-status { justify-content: flex-start; } }
 
 /* ---------------------------------------------------------------- skala nonius */
 .skala { display: block; border-radius: var(--r-md); padding: var(--s-2) var(--s-2) var(--s-1); }
@@ -58,7 +63,7 @@
 @media (prefers-reduced-motion: reduce) { .skala-indeks { transition: none; } }
 .skala-lurch {
   display: block; margin-top: var(--s-1);
-  font-family: var(--f-display); font-size: var(--s-11); font-weight: 600;
+  font-family: var(--f-display); font-size: var(--s-12); font-weight: 600;
   text-transform: uppercase; letter-spacing: .06em; color: var(--tinta-2);
 }
 
@@ -69,14 +74,14 @@
   border-left: 3px solid var(--garis-kuat); background: var(--lembar);
 }
 .kecil-label {
-  display: block; font-family: var(--f-display); font-size: var(--s-11); font-weight: 600;
+  display: block; font-family: var(--f-display); font-size: var(--s-12); font-weight: 600;
   text-transform: uppercase; letter-spacing: .07em; color: var(--tinta-2);
 }
 .kecil-nilai { display: block; font-family: var(--f-display); font-size: var(--s-30); font-weight: 700; line-height: 1.15; margin: 2px 0; }
 .kecil-nilai.aman     { color: var(--aman); }
-.kecil-nilai.perlu-perlu { color: var(--dekat); }
+.kecil-nilai.perlu-perlu { color: var(--dekat-teks); }
 .kecil-nilai.luar     { color: var(--luar); }
-.kecil-catatan { font-size: var(--s-12); color: var(--tinta-3); }
+.kecil-catatan { font-size: var(--s-13); color: var(--tinta-3); }
 .kecil.aman { border-left-color: var(--aman); }
 .kecil.perlu-perlu { border-left-color: var(--dekat); }
 .kecil.luar { border-left-color: var(--luar); }
@@ -91,7 +96,7 @@
 #toast {
   position: fixed; left: 50%; bottom: 24px; transform: translate(-50%, 20px);
   background: var(--tinta); color: #fff;
-  font-family: var(--f-display); font-size: var(--s-13); font-weight: 600; letter-spacing: .03em;
+  font-family: var(--f-display); font-size: var(--s-14); font-weight: 600; letter-spacing: .03em;
   padding: var(--s-3) var(--s-4); border-radius: var(--r-md);
   box-shadow: var(--bayang-lg);
   opacity: 0; pointer-events: none;
@@ -106,7 +111,7 @@
 @media (max-width: 480px) {
   .kepala { padding: var(--s-3); }
   .kepala h1 { font-size: var(--s-18); }
-  .kepala .saya b { font-size: var(--s-11); }
+  .kepala .saya b { font-size: var(--s-12); }
   .panel { padding: var(--s-3); }
   .kartu-alat-angka { font-size: var(--s-30); }
 }

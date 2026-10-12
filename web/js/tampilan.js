@@ -4,6 +4,9 @@
    ========================================================================== */
 
 const Layar = {
+  // Layar yang dibuka saat aplikasi start. Dipakai juga oleh tombol back
+  // supaya "kembali" selalu punya tempat kembali yang jelas.
+  UTAMA: 'ringkasan',
 
   /* ------------------------------------------------------------------ kartu alat */
   kartu: {
@@ -141,8 +144,8 @@ async render(wadah, app) {
         `<section class="panel">
            <h2>Pengajuan masuk</h2>
            <div class="tabel-gulir">
-             <table>
-               <thead><tr><th>Ticket</th><th>Tanggal</th><th>Alat</th><th class="num">Unit</th><th>Mesin</th><th>Kondisi</th><th>Status</th></tr></thead>
+             <table><caption class="sr">Daftar pengajuan pengasahan</caption>
+               <thead><tr><th scope="col">Ticket</th><th scope="col">Tanggal</th><th scope="col">Alat</th><th scope="col" class="num">Unit</th><th scope="col">Mesin</th><th scope="col">Kondisi</th><th scope="col">Status</th></tr></thead>
                <tbody>${t.map((x) => {
                  const status = String(x['Status_Verifikasi'] || 'Menunggu');
                  return `<tr>
@@ -232,7 +235,7 @@ async render(wadah, app) {
          <td class="num">${k.sisa < 300 ? UI.lencana(k.sisa + ' baris', 'dekat') : UI.esc(k.sisa)}</td></tr>`).join('');
 
       wadah.innerHTML =
-        box('Kapasitas', `<div class="tabel-gulir"><table><thead><tr><th>Sheet</th><th>Terisi</th><th>Grid</th><th>Sisa</th></tr></thead><tbody>${kap}</tbody></table></div>`) +
+        box('Kapasitas', `<div class="tabel-gulir"><table><caption class="sr">Kapasitas tiap sheet</caption><thead><tr><th scope="col">Sheet</th><th scope="col">Terisi</th><th scope="col">Grid</th><th scope="col">Sisa</th></tr></thead><tbody>${kap}</tbody></table></div>`) +
         box('Aturan scrap', `<p>Unit aktif: <b>${UI.esc(h.ringkasan.scrap.total)}</b> · tanpa Max_Regrind: <b>${UI.esc(h.ringkasan.scrap.tanpaMaks)}</b> · sisa negatif: <b>${UI.esc(h.ringkasan.scrap.negatif)}</b></p>`) +
         box('Badge data', `<p>${/BERSIH/.test(h.ringkasan.badge) ? UI.lencana('BERSIH', 'aman') : UI.lencana(h.ringkasan.badge || 'tidak terbaca', 'luar')}</p>`) +
         box('Sel error per sheet', (h.ringkasan.selError || []).length
@@ -255,7 +258,7 @@ async render(wadah, app) {
         btn.disabled = true; ket.textContent = 'Membersihkan…';
         selesaiCache(() => {
           ket.textContent = 'Cache bersih, memuat ulang…';
-          setTimeout(() => location.reload(true), 400);
+          setTimeout(() => location.reload(), 400);
         });
       };
     },
@@ -318,8 +321,8 @@ function renderKartu(d) {
     </section>
     <section class="panel">
       <h2>Daftar unit</h2>
-      <div class="tabel-gulir"><table>
-        <thead><tr><th>Unit</th><th>Nomor seri</th><th>Status</th><th class="num">Asah / batas</th><th>Catatan</th></tr></thead>
+      <div class="tabel-gulir"><table><caption class="sr">Daftar unit alat</caption>
+        <thead><tr><th scope="col">Unit</th><th scope="col">Nomor seri</th><th scope="col">Status</th><th scope="col" class="num">Asah / batas</th><th scope="col">Catatan</th></tr></thead>
         <tbody>${baris}</tbody>
       </table></div>
     </section>`;
