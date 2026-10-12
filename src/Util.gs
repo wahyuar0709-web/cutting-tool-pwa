@@ -1,4 +1,4 @@
-﻿/**
+/**
  * Util.gs â€” pembantu umum: sheet, header, kolom, tanggal, ID, locking.
  */
 
@@ -45,17 +45,21 @@ function header_(sheet) {
 /**
  * Jadikan objek baris (nilai -> header) yang hanya berisi kolom yang diminta.
  * values.get tidak boleh di indeks langsung: baris kosong dilewati.
+ *
+ * PENTING: mulai dari baris 2. Baris 1 adalah header, dan kalau ikut
+ * terbawa, nonempty_() menghitungnya sebagai data — itulah why
+ * "Master User" pernah melaporkan 4 pengguna padahal hanya 3.
  */
 function rows_(sheet, kolomDiminta) {
   const jml = sheet.getLastRow();
-  if (jml < 1) return [];
-  const nilai = sheet.getRange(1, 1, jml, sheet.getLastColumn()).getValues();
+  if (jml < 2) return [];
+  const nilai = sheet.getRange(2, 1, jml - 1, sheet.getLastColumn()).getValues();
   const peta = header_(sheet);
   const namaKolom = kolomDiminta && kolomDiminta.length
     ? kolomDiminta
     : Object.keys(peta);
   return nilai.map((row, i) => {
-    const o = { _baris: i + 1 };
+    const o = { _baris: i + 2 };
     namaKolom.forEach((nama) => {
       const idx = peta[nama];
       if (idx) o[nama] = row[idx - 1];
