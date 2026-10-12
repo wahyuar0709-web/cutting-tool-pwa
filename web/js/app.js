@@ -6,35 +6,78 @@ const App = {
   state: { layar: null, kartuKode: '', profil: null },
   cache: { referensi: null, kartu: null },
 
-  /* ---------------------------------------------------------------- mulai */
+/* ---------------------------------------------------------------- mulai */
   async boot() {
-    const isi = document.getElementById('isi');
-    const r = await Api.whoami();
+    // Tanpa CLIENT_ID, aplikasi langsung masuk mode pratinjau.
+    if (!KONFIGURASI.CLIENT_ID) { this.bootPratinjau(); return; }
+    await this.tampilkanMasuk();
 
+    const r = await Api.whoami();
     if (!r.ok) {
-      isi.innerHTML = `<div class="panel"><h2>Belum bisa masuk</h2><div class="pesan gagal">${UI.esc(r.pesan)}</div>
-        <p class="ket">Aplikasi ini hanya terbuka untuk akun Google yang terdaftar di sheet <span class="mono">Master User</span>.</p></div>`;
+      if (r.perluMasuk || /token|Belum masuk/i.test(r.pesan || '')) { this.sembunyikanMasuk(); return; }
+      this.sembunyikanMasuk();
+      UI.toast(r.pesan || 'Tidak bisa masuk.', 'gagal');
       return;
     }
+    this.sembunyikanMasuk();
+    await this.mulaiDengan(r.data);
+  },
 
-    // Di luar Apps Script (mis. GitHub Pages), data dibaca dari berkas
-    // pratinjau. Tandai dengan jelas supaya tidak tertukar dengan data nyata.
-    const pratinjau = !Api.tersambung();
-    this.state.profil = r.data;
-    document.getElementById('rangka').dataset.peran = r.data.peran;
+  /** Tampilkan layar masuk dengan tombol Google. */
+  async tampilkanMasuk() {
+    const el = document.getElementById('masuk');
+    const pesan = document.getElementById('masuk-pesan');
+    el.hidden = false;
+    pesan.innerHTML = '<span class="memuat"></span>';
+
+    // Tunggu Google Identity Services termuat
+    for (let i = 0; i < 40 && !window.google?.accounts?.id; i++) {
+      await new Promise((r) => setTimeout(r, 150));
+    }
+    if (!window.google?.accounts?.id) {
+      pesan.innerHTML = '<div class="pesan gagal">Google Identity Services gagal dimuat. Periksa koneksi internet.</div>';
+      return;
+    }
+    pesan.innerHTML = '';
+    Auth.siap();
+    google.accounts.id.renderButton(document.getElementById('wadah-google'), {
+      theme: 'outline', size: 'large', shape: 'rectangular', text: 'continue_with',
+    });
+
+    document.getElementById('ke-pratinjau').onclick = (e) => { e.preventDefault(); this.bootPratinjau(); };
+  },
+
+  sembunyikanMasuk() { document.getElementById('masuk').hidden = true; },
+
+  /** Mode pratinjau: data dari berkas, tanpa menulis. */
+  async bootPratinjau() {
+    this.sembunyikanMasuk();
     document.getElementById('saya').innerHTML =
-      (pratinjau ? '<span class="peran" data-p="SPV">PRATINJAU</span>' : `<span class="peran" data-p="${UI.esc(r.data.peran)}">${UI.esc(r.data.peran)}</span>`) +
-      `<b>${UI.esc(pratinjau ? 'Data contoh' : r.data.nama)}</b>`;
+      '<span class="peran" data-p="SPV">PRATINJAU</span><b>Data contoh</b>';
+    document.body.classList.add('mode-pratinjau');
 
-    if (pratinjau) document.body.classList.add('mode-pratinjau');
+    const refs = await Api.referensi();
+    this.cache.referensi = refs.ok ? refs.data : null;
+    this.state.profil = { peran: 'ADMIN', nama: 'Pratinjau', izin: ['dashboard', 'stok', 'kartu', 'tiket.buat', 'tiket.lihat', 'master', 'ekspor'] };
+    document.getElementById('rangka').dataset.peran = 'ADMIN';
+    this.bangunNav();
+    const pertama = this.navTersedia()[0];
+    this.pergi(pertima ? pertama.kunci : 'ringkasan');
+  },
 
-    // referensi dibutuhkan hampir semua layar
+  /** Mulai aplikasi setelah identitas diketahui. */
+  async mulaiDengan(profil) {
+    this.state.profil = profil;
+    document.getElementById('rangka').dataset.peran = profil.peran;
+    document.getElementById('saya').innerHTML =
+      `<span class="peran" data-p="${UI.esc(profil.peran)}">${UI.esc(profil.peran)}</span><b>${UI.esc(profil.nama)}</b>`;
+
     const refs = await Api.referensi();
     this.cache.referensi = refs.ok ? refs.data : null;
 
     this.bangunNav();
     const pertama = this.navTersedia()[0];
-    this.pergi(pertama ? pertama.kunci : 'ringkasan');
+    this.pergi(pertima ? pertama.kunci : 'ringkasan');
   },
 
   /* ---------------------------------------------------------------- navigasi */

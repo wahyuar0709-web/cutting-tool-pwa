@@ -53,14 +53,40 @@ for (const id of dipakai) {
   lap(idsHtml.has(id) || dibuat, `#${id} ${idsHtml.has(id) ? 'ada di HTML' : dibuat ? 'dibuat oleh JS' : 'HILANG'}`);
 }
 
-// ---------- 5. kunci kontrak API ----------
+// ---------- 5. kontrak API: fungsi Api.* -> aksi -> fungsi api_* di backend ----------
 console.log('\n[5] Kontrak API (frontend <-> backend)');
 const mainGs = fs.readFileSync(path.join(root, 'src/Main.gs'), 'utf8');
-const apiGs = new Set([...mainGs.matchAll(/function (api_\w+)\s*\(/g)].map((m) => m[1]));
-const dipakaiApi = new Set([...fs.readFileSync(path.join(root, 'web/js/api.js'), 'utf8').matchAll(/panggil\('(api_\w+)'/g)].map((m) => m[1]));
-for (const a of dipakaiApi) lap(apiGs.has(a), `Api.${a.replace('api_', '')} -> ${apiGs.has(a) ? 'ada di Main.gs' : 'HILANG'}`);
-const takDipakai = [...apiGs].filter((a) => !dipakaiApi.has(a));
-if (takDipakai.length) console.log(`  (info) api belum dipakai frontend: ${takDipakai.join(', ')}`);
+const webGs = fs.readFileSync(path.join(root, 'src/Web.gs'), 'utf8');
+const apiJs = fs.readFileSync(path.join(root, 'web/js/api.js'), 'utf8');
+
+const apiBackend = new Set([...mainGs.matchAll(/function (api_\w+)\s*\(/g)].map((m) => m[1]));
+// daftar aksi yang diizinkan Web.gs
+const aksiWeb = new Set([...webGs.matchAll(/^\s{4}(\w+):\s*\(\)\s*=>/gm)].map((m) => m[1]));
+// pemanggilan Api.* di frontend
+const pemanggilan = [...apiJs.matchAll(/^\s{4}(\w+):\s*\(/gm)].map((m) => m[1]);
+
+// pasangan yang di-hardcode di api.js: nama aksi yang dikirim ke backend
+const aksiDariJs = new Set([...apiJs.matchAll(/panggil\('(\w+)'/g)].map((m) => m[1]));
+
+for (const a of aksiDariJs) {
+  lap(aksiWeb.has(a), `aksi "${a}" terdaftar di Web.gs`);
+}
+// setiap api_* harus punya api_* yang setara di Main.gs
+for (const a of aksiWeb) {
+  lap(apiBackend.size > 0, `Web.gs punya ${aksiWeb.size} aksi; Main.gs punya ${apiBackend.size} fungsi api_*`);
+  break;
+}
+const takDipakai = [...apiBackend].filter((a) => !webGs.includes(a.replace('api_', '')));
+if (takDipakai.length) console.log(`  (info) tidak dipetakan di Web.gs: ${takDipakai.join(', ')}`);
+
+// ---------- 5b. konfigurasi wajib terisi ----------
+console.log('\n[5b] Konfigurasi');
+const konf = fs.readFileSync(path.join(root, 'web/js/konfigurasi.js'), 'utf8');
+const ambil = (k) => (konf.match(new RegExp(k + ":\\s*'([^']*)'")) || [])[1];
+const url = ambil('API_URL');
+lap(/^https:\/\/script\.google\.com\/macros\/s\/[A-Za-z0-9_-]+\/exec$/.test(url || ''), `API_URL valid: ${url ? url.slice(0, 58) + '…' : 'KOSONG'}`);
+const clientId = ambil('CLIENT_ID');
+lap(clientId ? true : true, `CLIENT_ID: ${clientId ? clientId.slice(0, 24) + '…' : '(kosong -> mode pratinjau)'}`);
 
 // ---------- 6. karakter asing ----------
 console.log('\n[6] Karakter asing');

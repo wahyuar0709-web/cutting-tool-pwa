@@ -44,7 +44,26 @@
 
 <div id="toast" role="status" aria-live="polite"></div>
 
+<!-- Layar masuk, ditampilkan hanya bila CLIENT_ID sudah diisi -->
+<section class="masuk" id="masuk" hidden>
+  <div class="masuk-kartu">
+    <img src="assets/icon-192.png" alt="" width="64" height="64" class="masuk-logo">
+    <h1>Monitoring Cutting Tool</h1>
+    <p>Pelacakan alat potong: penggunaan, pengasahan, dan stok.</p>
+    <div id="wadah-google" class="masuk-google"></div>
+    <div id="masuk-pesan" class="masuk-pesan"></div>
+    <div class="masuk-pisah"></div>
+    <p class="masuk-kecil">
+      Masuk dengan akun Google yang terdaftar di sheet <span class="mono">Master User</span>.
+      <a href="#" id="ke-pratinjau">Lihat pratinjau dengan data contoh</a>
+    </p>
+  </div>
+</section>
+
+<script src="https://accounts.google.com/gsi/client" async defer></script>
+<script src="js/konfigurasi.js"></script>
 <script src="js/scale.js"></script>
+<script src="js/auth.js"></script>
 <script src="js/api.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/tampilan.js"></script>

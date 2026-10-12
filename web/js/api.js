@@ -1,50 +1,69 @@
 /* ==========================================================================
    api.js — jembatan ke backend Apps Script.
 
-   Dua jalur:
-   1.-mode app  : google.script.run (hanya ada di dalam Apps Script)
-   2. mode pratinjau: berkas data/pratinjau.json (isi nyata dari spreadsheet)
+   Jalur:
+   1. Pratinjau : web/data/pratinjau.json (data nyata, hanya baca)
+   2. Langsung (editor Apps Script): fungsi api_* dipanggil langsung
+   3. Dari browser (GitHub Pages)  : fetch POST ke KONFIGURASI.API_URL, bawa token Google
 
-   Semua fungsi mengembalikan {ok, data, pesan, detail}. Tidak ada error yang
-   dibiarkan sampai ke layar sebagai exception.
+   Semua fungsi mengembalikan {ok, data, pesan, detail}. Tidak ada exception
+   yang dibiarkan sampai ke layar.
    ========================================================================== */
 
 const Api = (() => {
-  let modePratinjau = false;
   let cachePratinjau = null;
 
-  async function muatPratinjau() {
-    if (cachePratinjau) return cachePratinjau;
-    const r = await fetch('data/pratinjau.json', { cache: 'no-store' });
-    if (!r.ok) throw new Error('berkas pratinjau tidak bisa dibaca (' + r.status + ')');
-    cachePratinjau = await r.json();
-    return cachePratinjau;
-  }
-
-  async function dariServer(nama, args) {
-    return new Promise((res) => {
-      google.script.run
-        .withSuccessHandler((r) => res(normalisasi(r)))
-        .withFailureHandler((e) => res({ ok: false, pesan: String((e && e.message) || e || 'Gagal menghubungi server.'), detail: [] }))[nama](...args);
-    });
-  }
-
-  async function dariPratinjau(nama, args) {
+  async function dariPratinjau(aksi) {
     try {
-      const d = await muatPratinjau();
-      switch (nama) {
-        case 'api_whoami':         return { ok: true, data: d.profil };
-        case 'api_referensi':      return { ok: true, data: d.referensi };
-        case 'api_dashboard':      return { ok: true, data: d.dashboard };
-        case 'api_kartuAlat':      return { ok: true, data: d.kartu };
-        case 'api_daftarTiket':    return { ok: true, data: d.daftarTiket || [] };
-        case 'api_healthCheck':    return { ok: true, data: d.healthCheck };
-        // MENULIS tidak boleh jalan di pratinjau: pratinjau membaca spreadsheet,
-        // menulisinya berarti menulis ke data produksi tanpa sengaja.
-        default: return { ok: false, pesan: 'Mode pratinjau hanya bisa dibaca. Jalankan dari Apps Script untuk menulis.', detail: [] };
+      if (!cachePratinjau) {
+        const r = await fetch('data/pratinjau.json', { cache: 'no-store' });
+        if (!r.ok) throw new Error('berkas pratinjau tidak terbaca (' + r.status + ')');
+        cachePratinjau = await r.json();
+      }
+      const d = cachePratinjau;
+      switch (aksi) {
+        case 'whoami':      return { ok: true, data: d.profil };
+        case 'referensi':   return { ok: true, data: d.referensi };
+        case 'dashboard':   return { ok: true, data: d.dashboard };
+        case 'kartu':       return { ok: true, data: d.kartu };
+        case 'daftarTiket': return { ok: true, data: d.daftarTiket || [] };
+        case 'health':      return { ok: true, data: d.healthCheck };
+        default:
+          return { ok: false, pesan: 'Mode pratinjau hanya bisa dibaca.', detail: [] };
       }
     } catch (e) {
       return { ok: false, pesan: 'Pratinjau tidak bisa dimuat: ' + (e.message || e), detail: [] };
+    }
+  }
+
+  /**
+   * Frontend sengaja TIDAK dilayani HtmlService: iframe sandbox akan
+   * mematikan service worker, manifest, dan mode offline — tiga alasan
+   * kenapa aplikasi ini dibangun sebagai PWA. Jadi tidak ada jalur
+   * google.script.run di sini; dari browser selalu lewat HTTP.
+   */
+
+  async function dariHttp(aksi, argumen) {
+    let token;
+    try {
+      token = await Auth.tokenAktif();
+    } catch (e) {
+      return { ok: false, pesan: 'Belum masuk. Masuk dengan akun Google dulu.', detail: [], perluMasuk: true };
+    }
+    if (!token) return { ok: false, pesan: 'Belum masuk.', detail: [], perluMasuk: true };
+
+    try {
+      const r = await fetch(KONFIGURASI.API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ token: token, aksi: aksi, argumen: argumen || {} }),
+      });
+      const teks = await r.text();
+      let json;
+      try { json = JSON.parse(teks); } catch { return { ok: false, pesan: 'Respons server tidak dimengerti.', detail: [] }; }
+      return normalisasi(json);
+    } catch (e) {
+      return { ok: false, pesan: 'Tidak bisa menghubungi backend: ' + (e.message || e), detail: [] };
     }
   }
 
@@ -55,29 +74,55 @@ const Api = (() => {
       data: r.data ?? null,
       pesan: r.pesan || r.info || '',
       detail: Array.isArray(r.detail) ? r.detail : (r.masalah || []),
+      perluMasuk: !!r.perluMasuk,
     };
   }
 
-  const adaServer = () => typeof google !== 'undefined' && !!google.script && !!google.script.run;
+async function panggil(aksi, argumen) {
+    // Inside the Apps Script editor itself there are the api_* functions.
+    if (typeof api_whoami === 'function') {
+      try {
+        const pemanggil = {
+          whoami: () => api_whoami(), referensi: () => api_referensi(),
+          dashboard: () => api_dashboard(), kartu: (a) => api_kartuAlat(a.kode),
+          buatTicket: (a) => api_buatTicket(a.tiket || {}), daftarTiket: (a) => api_daftarTiket(a.filter || {}),
+          movement: (a) => api_catatMovement(a.movement || {}), health: () => api_healthCheck(),
+        }[aksi];
+        return normalisasi(await pemanggil(argumen || {}));
+      } catch (e) {
+        return { ok: false, pesan: String(e.message || e), detail: [] };
+      }
+    }
+    if (Auth.bisaMasuk() || Auth.sudahMasuk) return dariHttp(aksi, argumen);
+    return dariPratinjau(aksi);
+  }
 
-  async function panggil(nama, ...args) {
-    if (modePratinjau) return dariPratinjau(nama, args);
-    if (!adaServer()) return dariPratinjau(nama, args);   // GitHub Pages dll.
-    return dariServer(nama, args);
+  /** Cek apakah backend bisa dihubungi, tanpa perlu token. */
+  async function periksaServer() {
+    if (!KONFIGURASI.API_URL) return { ok: false, pesan: 'API_URL belum diisi.' };
+    try {
+      const r = await fetch(KONFIGURASI.API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'text/plain;charset=utf-8' },
+        body: JSON.stringify({ aksi: 'ping' }),
+      });
+      const j = JSON.parse(await r.text());
+      return { ok: !!j.nama, data: j };
+    } catch (e) {
+      return { ok: false, pesan: 'Backend tidak terjangkau: ' + (e.message || e) };
+    }
   }
 
   return {
-    /** true kalau benar-benar sedang berjalan di dalam Apps Script */
-    tersambung: adaServer,
-    paksaPratinjau(v) { modePratinjau = !!v; },
-    whoami: () => panggil('api_whoami'),
-    referensi: () => panggil('api_referensi'),
-    dashboard: () => panggil('api_dashboard'),
-    kartuAlat: (kode) => panggil('api_kartuAlat', kode),
-    buatTicket: (t) => panggil('api_buatTicket', t),
-    daftarTiket: (f) => panggil('api_daftarTiket', f),
-    catatMovement: (m) => panggil('api_catatMovement', m),
-    healthCheck: () => panggil('api_healthCheck'),
+    periksaServer,
+    whoami: () => panggil('whoami'),
+    referensi: () => panggil('referensi'),
+    dashboard: () => panggil('dashboard'),
+    kartuAlat: (kode) => panggil('kartu', { kode }),
+    buatTicket: (t) => panggil('buatTicket', { tiket: t }),
+    daftarTiket: (f) => panggil('daftarTiket', { filter: f }),
+    catatMovement: (m) => panggil('movement', { movement: m }),
+    healthCheck: () => panggil('health'),
   };
 })();
 

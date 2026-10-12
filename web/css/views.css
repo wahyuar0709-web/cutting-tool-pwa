@@ -4,6 +4,23 @@
 
 .kolom { min-width: 0; }
 
+/* ---------------------------------------------------------------- layar masuk */
+.masuk {
+  position: fixed; inset: 0; z-index: 60;
+  background: var(--lembar);
+  display: grid; place-items: center; padding: var(--s-4);
+}
+.masuk-kartu { text-align: center; max-width: 380px; }
+.masuk-logo { border-radius: 14px; margin-bottom: var(--s-3); }
+.masuk-kartu h1 { font-family: var(--f-display); font-size: var(--s-22); font-weight: 700; text-transform: uppercase; letter-spacing: .01em; }
+.masuk-kartu > p { color: var(--tinta-2); margin-top: var(--s-1); }
+.masuk-google { min-height: 44px; display: grid; place-items: center; margin: var(--s-5) 0 var(--s-3); }
+.masuk-pesan { min-height: 22px; }
+.masuk-pisah { height: 1px; background: var(--garis); margin: var(--s-4) 0 var(--s-3); }
+.masuk-kecil { font-size: var(--s-12); color: var(--tinta-3); line-height: 1.6; }
+.masuk-kecil .mono { font-family: var(--f-mono); }
+.masuk-kecil a { color: var(--biru); }
+
 /* ---- mode pratinjau: penanda yang tidak bisa tertukar dengan data nyata ---- */
 .mode-pratinjau .kepala { border-bottom: 2px dashed var(--dekat); }
 .mode-pratinjau .isi::before {
