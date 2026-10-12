@@ -14,7 +14,7 @@
  * SYARAT: JANGAN pernah menutupi cache kode tanpa menaikkan VERSI.
  * Kalau tidak, cache lama tidak akan dibuang.
  */
-const VERSI = 'ctc-v3';
+const VERSI = 'ctc-v4';
 
 const KODE = ['.html', '.js', '.css', '.json', ''];
 const ASET = ['.png', '.svg', '.woff2', '.woff', '.ico'];
