@@ -240,14 +240,46 @@ async render(wadah, app) {
           : '<p>Tidak ada nilai galat di seluruh workbook.</p>') +
         box('Hasil', h.sehat
           ? UI.lencana('SEHAT', 'aman')
-          : `<div class="pesan gagal"><ul>${h.masalah.map((m) => `<li>${UI.esc(m)}</li>`).join('')}</ul></div>`);
+          : `<div class="pesan gagal"><ul>${h.masalah.map((m) => `<li>${UI.esc(m)}</li>`).join('')}</ul></div>`) +
+        box('Versi aplikasi', `
+            <div class="cari-baris">
+              <button class="tombol" id="btn-cache">Bersihkan cache lalu muat ulang</button>
+              <span class="ket" id="ket-cache">Membersihkan…</span>
+            </div>
+            <p class="ket">Gunakan kalau tampilan tidak sesuai dengan kode terbaru. Service worker
+            menyimpan berkas di perangkat ini; membersihkannya membuat berkas segar diambil lagi.</p>`);
+
+      const btn = document.getElementById('btn-cache');
+      const ket = document.getElementById('ket-cache');
+      if (btn) btn.onclick = () => {
+        btn.disabled = true; ket.textContent = 'Membersihkan…';
+        selesaiCache(() => {
+          ket.textContent = 'Cache bersih, memuat ulang…';
+          setTimeout(() => location.reload(true), 400);
+        });
+      };
     },
   },
 };
 
 /**
+ * Bersihkan cache service worker, lalu panggil selesai().
+ * Dipakai tombol "Bersihkan cache" di layar Sistem.
+ */
+async function selesaiCache(selesai) {
+  if (!navigator.serviceWorker || !navigator.serviceWorker.controller) { selesai(); return; }
+  const ctrl = navigator.serviceWorker.controller;
+  const batas = setTimeout(selesai, 3000);
+  const dengar = (e) => {
+    if (e.data && e.data.ok !== false) { clearTimeout(batas); ctrl.removeEventListener('message', dengar); selesai(); }
+  };
+  ctrl.addEventListener('message', dengar);
+  ctrl.postMessage({ tipe: 'bersihkanCache' });
+}
+
+/**
  * Kartu alat + skala nonius.
- * Nama, tipe, dan spesifikasi diambil dari dzarida kartu itu sendiri —
+ * Nama, tipe, dan spesifikasi diambil dari data kartu itu sendiri —
  * bukan dari kode yang diketik di kotak pencarian, supaya judulnya tidak
  * pernah tercampur dengan alat lain.
  */
