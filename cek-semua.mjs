@@ -111,7 +111,7 @@ lap(asing === 0, asing === 0 ? 'tidak ada karakter asing di seluruh project' : `
 console.log('\n[6b] Deklarasi tanpa spasi');
 const BERBAHAYA = /(^|[^\w$.])(const|let|var)[a-zA-Z_$][\w$]*\s*=[^=]/;
 let cacah = 0;
-const KATA_KUNCI = new Set(['if', 'for', 'while', 'switch', 'return', 'catch', 'typeof', 'new', 'await', 'async', 'function', 'const', 'let', 'var', 'delete', 'in', 'of', 'do', 'else', 'try', 'finally', 'throw', 'case', 'break', 'continue', 'class', 'import', 'export', 'instanceof', 'yield', 'static', 'get', 'set', 'with', 'void', 'debugger']);
+const KATA_KUNCI = new Set(['if', 'for', 'while', 'switch', 'return', 'catch', 'typeof', 'new', 'await', 'async', 'function', 'const', 'let', 'var', 'delete', 'in', 'of', 'do', 'else', 'try', 'finally', 'throw', 'case', 'break', 'continue', 'class', 'import', 'export', 'instanceof', 'yield', 'static', 'get', 'set', 'with', 'void', 'debugger', 'null', 'true', 'false', 'undefined', 'NaN', 'Infinity', 'this', 'arguments', 'globalThis', 'eval']);
 const semuaSrc = [];
 for (const f of js) semuaSrc.push({ f, t: fs.readFileSync(f, 'utf8') });
 for (const { f, t } of semuaSrc) {
@@ -128,9 +128,9 @@ lap(cacah === 0, cacah === 0 ? 'tidak ada deklarasi const/let/var tanpa spasi' :
 // ---------- 6c. identifier yang dipakai tapi tidak pernah dideklarasikan ----------
 // Menangkap "cached is not defined" lebih awal: cari nama yang dipakai
 // sebagai variabel tapi tak pernah muncul sebagai deklarasi di berkas itu.
-console.log('\n[6c] Identifier gantung');
+console.log('\n[6c] Identifier gantung (backend + frontend)');
 for (const { f, t } of semuaSrc) {
-  if (!f.endsWith('.gs')) continue;
+  if (!/\.(gs|js|mjs)$/.test(f)) continue;   // backend DAN frontend
   const dideklarasi = new Set();
   for (const m of t.matchAll(/\b(?:const|let|var|function|class)\s+([A-Za-z_$][\w$]*)/g)) dideklarasi.add(m[1]);
   for (const m of t.matchAll(/(?:^|[^\w$.])([A-Za-z_$][\w$]*)\s*(?:=|\(|,|\)|;|\+\+)/gm)) {
@@ -145,6 +145,75 @@ for (const { f, t } of semuaSrc) {
   }
 }
 lap(true, 'pemeriksaan identifier selesai');
+
+// ---------- 6d. identifier tanpa deklarasi (salah ketik) ----------
+// Menangkap "pertima" vs "pertama" dan "cached" vs "cache":
+// nama yang dipakai sebagai nilai tapi tidak pernah dideklarasikan.
+// Ini yang paling sering luput karena sintaksnya sah.
+console.log('\n[6d] Identifier tanpa deklarasi');
+const GLOBAL = new Set([
+  'Math', 'JSON', 'Object', 'Array', 'String', 'Number', 'Boolean', 'Date', 'Map', 'Set', 'WeakMap', 'WeakSet',
+  'CacheService', 'LockService', 'Session', 'SpreadsheetApp', 'ContentService', 'HtmlService', 'PropertiesService',
+  'Logger', 'UrlFetchApp', 'Utilities', 'Apps', 'Google', 'console', 'arguments', 'undefined', 'NaN', 'Infinity',
+  'fetch', 'setTimeout', 'setInterval', 'clearTimeout', 'clearInterval', 'Promise', 'Error', 'TypeError',
+  'Response', 'Request', 'Headers', 'URL', 'URLSearchParams', 'Intl', 'Symbol', 'Proxy', 'Reflect',
+  'parseInt', 'parseFloat', 'isNaN', 'encodeURIComponent', 'decodeURIComponent', 'TextEncoder', 'TextDecoder',
+  'self', 'caches', 'navigator', 'window', 'document', 'location', 'google', 'sessionStorage', 'localStorage',
+  'Blob', 'File', 'FileReader', 'FormData', 'CustomEvent', 'Event', 'Notification', 'matchMedia', 'history',
+  'screen', 'performance', 'crypto', 'structuredClone', 'queueMicrotask', 'reportError', 'Response',
+  'KONFIGURASI', 'Api', 'Auth', 'UI', 'App', 'Layar', 'renderSkala', 'geserSkala', 'renderKartu',
+]);
+
+/** jarak Levenshtein, dipotong setelah Ambang agar tidak mahal */
+function jarak(a, b, maks = 2) {
+  if (Math.abs(a.length - b.length) > maks) return maks + 1;
+  const prev = new Array(b.length + 1).fill(0).map((_, i) => i);
+  for (let i = 1; i <= a.length; i++) {
+    let min = i;
+    const cur = [i];
+    for (let j = 1; j <= b.length; j++) {
+      cur[j] = Math.min(prev[j] + 1, cur[j - 1] + 1, prev[j - 1] + (a[i - 1] === b[j - 1] ? 0 : 1));
+      if (cur[j] < min) min = cur[j];
+    }
+    if (min > maks) return maks + 1;
+    for (let j = 0; j <= b.length; j++) prev[j] = cur[j];
+  }
+  return prev[b.length];
+}
+
+let jumlah6d = 0;
+const berkasKode = semuaSrc.filter(({ f }) => /[\\/](src|web[\\/]js)[\\/]/.test(f));
+for (const { f, t } of berkasKode) {
+  const namaFile = path.relative(root, f);
+  const kode = t
+    .replace(/\/\*[\s\S]*?\*\//g, ' ')
+    .replace(/(^|[^:])\/\/.*$/gm, '$1')
+    .replace(/<[^<>]{0,300}>/g, ' ')          // buang tag HTML beserta atributnya
+    .replace(/'(?:\\.|[^'\\])*'/g, "''")
+    .replace(/"(?:\\.|[^"\\])*"/g, '""')
+    .replace(/`(?:\\.|[^`\\])*`/g, '``');
+
+  const dideklarasi = new Set();
+  for (const m of kode.matchAll(/\b(?:const|let|var|function|class)\s+([A-Za-z_$][\w$]*)/g)) dideklarasi.add(m[1]);
+  for (const m of kode.matchAll(/(?:^|[({,\[]\s*)([A-Za-z_$][\w$]*)\s*(?==|,|\)|;|:)/gm)) dideklarasi.add(m[1]);
+
+  const dipakai = new Set();
+  for (const m of kode.matchAll(/(?<![.\w$])([a-z][\w$]{2,})(?=\s*[?)}\],;:]|\s*[+\-*/<>=&|])/gm)) dipakai.add(m[1]);
+
+  // Hanya laporkan nama yang MIRIP dengan nama yang sudah ada (selisih <= 2 huruf).
+  // Inilah bentuk bug yang berulang: ketik ulang nama sendiri dengan satu huruf hilang.
+  const dekat = (nama) => [...dideklarasi].find((d) => Math.abs(d.length - nama.length) <= 2 && jarak(d.toLowerCase(), nama.toLowerCase(), 2) <= 2);
+  for (const n of dipakai) {
+    if (dideklarasi.has(n) || GLOBAL.has(n) || KATA_KUNCI.has(n)) continue;
+    const mirip = dekat(n);
+    if (!mirip) continue;
+    jumlah6d++;
+    const contoh = kode.split('\n').find((b) => new RegExp('(?<![.\\w$])' + n + '(?![\\w$])').test(b)) || '';
+    console.log(`  GAGAL ${namaFile}: "${n}" kemungkinan salah ketik dari "${mirip}"`);
+    if (contoh.trim()) console.log(`      baris: ${contoh.trim().slice(0, 76)}`);
+  }
+}
+lap(jumlah6d === 0, jumlah6d === 0 ? 'tidak ada salah ketik identifier' : `${jumlah6d} kemungkinan salah ketik`);
 
 // ---------- 7. nilai yang tidak disengaja di CSS ----------
 console.log('\n[7] Token CSS');

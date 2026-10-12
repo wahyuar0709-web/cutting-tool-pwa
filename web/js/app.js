@@ -1,5 +1,5 @@
 /* ==========================================================================
-   app.js — pencemaran: muat profil, bangun navigasi sesuai peran, render layar.
+   app.js â€” pencemaran: muat profil, bangun navigasi sesuai peran, render layar.
    ========================================================================== */
 
 const App = {
@@ -50,7 +50,7 @@ const App = {
       const d = diag.data || {};
       const baris = [
         'CLIENT_ID terisi: ' + (d.clientIdTerisi ? 'ya' : 'TIDAK'),
-        'Sheet Master User terbaca: ' + (d.sheetTerbaca ? 'ya' : 'tidak') + ' — ' + (d.barisMasterUser || 0) + ' baris',
+        'Sheet Master User terbaca: ' + (d.sheetTerbaca ? 'ya' : 'tidak') + ' â€” ' + (d.barisMasterUser || 0) + ' baris',
         'Pengguna terdaftar: ' + ((d.pengguna || []).map((p) => `${p.email} (${p.peran}${p.aktif === 'Y' ? '' : ', nonaktif'})`).join(', ') || 'tidak ada'),
         'UrlFetchApp: ' + String(d.urlFetchApp || 'tidak diketahui'),
       ];
@@ -79,13 +79,13 @@ const App = {
   async cekVersiBackend() {
     const p = await Api.periksaServer();
     if (!p.ok) {
-      this.pesanVersi = 'Backend tidak terjangkau: ' + (p.pesan || '') + ' — aplikasi mungkin tidak bisa dipakai.';
+      this.pesanVersi = 'Backend tidak terjangkau: ' + (p.pesan || '') + ' â€” aplikasi mungkin tidak bisa dipakai.';
       return;
     }
     const build = p.data && p.data.build;
     if (!build) {
       this.pesanVersi = 'Backend masih menjalankan versi lama (tidak ada nomor build). '
-        + 'Deploy ulang web app di Apps Script: Deploy → Manage deployments → ikon pensil → New version → Deploy.';
+        + 'Deploy ulang web app di Apps Script: Deploy â†’ Manage deployments â†’ ikon pensil â†’ New version â†’ Deploy.';
       return;
     }
     if (build !== KONFIGURASI.BUILD_DIHARAPKAN) {
@@ -141,7 +141,7 @@ const App = {
     document.getElementById('rangka').dataset.peran = 'ADMIN';
     this.bangunNav();
     const pertama = this.navTersedia()[0];
-    this.pergi(pertima ? pertama.kunci : 'ringkasan');
+    this.pergi(pertama ? pertama.kunci : 'ringkasan');
   },
 
   /** Mulai aplikasi setelah identitas diketahui. */
@@ -156,7 +156,7 @@ const App = {
 
     this.bangunNav();
     const pertama = this.navTersedia()[0];
-    this.pergi(pertima ? pertama.kunci : 'ringkasan');
+    this.pergi(pertama ? pertama.kunci : 'ringkasan');
   },
 
   /* ---------------------------------------------------------------- navigasi */
@@ -249,7 +249,7 @@ function pasangPenangkapKesalahan() {
          <ul class="ket">
            <li>Muat ulang halaman dengan <span class="mono">Ctrl+Shift+R</span> (menghapus cache).</li>
            <li>Pastikan backend Apps Script sudah di-deploy versi terbaru.</li>
-           <li>Buka F12 → Console, cari pesan merah pertama, kirimkan kalau masih gagal.</li>
+           <li>Buka F12 (menu Console), cari pesan merah pertama, kirimkan kalau masih gagal.</li>
          </ul>
          <p><button class="tombol" onclick="location.reload()">Muat ulang</button>
             <button class="tombol halus" id="ke-pratinjau2">Lihat pratinjau</button></p>
@@ -259,7 +259,7 @@ function pasangPenangkapKesalahan() {
   };
 
   window.addEventListener('error', (e) => {
-    tampilkan('Ada kesalahan di halaman', (e.message || 'Kesalahan tidak dikenal') + ' — ' + (e.filename || '') + ' baris ' + (e.lineno || '?'));
+    tampilkan('Ada kesalahan di halaman', (e.message || 'Kesalahan tidak dikenal') + ' â€” ' + (e.filename || '') + ' baris ' + (e.lineno || '?'));
   });
 
   window.addEventListener('unhandledrejection', (e) => {
@@ -284,7 +284,7 @@ function watchdog() {
         `<section class="panel kartu-penyebab">
            <h2>Halaman belum selesai memuat</h2>
            <div class="pesan gagal">Setelah 15 detik tidak ada yang tampil. Kemungkinan pustaka Google tidak termuat, atau ada kesalahan JavaScript.</div>
-           <p class="ket">Periksa F12 → Console untuk pesan merah pertama.</p>
+           <p class="ket">Periksa F12 (menu Console) untuk pesan merah pertama.</p>
            <p><button class="tombol" onclick="location.reload()">Muat ulang</button>
               <button class="tombol halus" id="ke-pratinjau3">Lihat pratinjau dengan data contoh</button></p>
          </section>`;
