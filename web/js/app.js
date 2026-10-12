@@ -25,19 +25,42 @@ const App = {
       Auth.hapus();
       await this.tampilkanMasuk();
       document.getElementById('masuk-pesan').innerHTML =
-        '<div class="pesan gagal">Sesi sebelumnya tidak diterima server. Silakan masuk lagi.</div>';
+        '<div class="pesan gagal">Sesi sebelumnya ditolak server. Masuk sekali lagi.</div>';
       return;
     }
     this.sembunyikanMasuk();
     await this.mulaiDengan(profil);
   },
 
-  /** Ambil profil dari server (bisa gagal). */
+  /** Tampilkan penyebab penolakan server, persis seperti yang dikirim backend. */
+  async tampilkanKenapaGagal() {
+    const kotak = document.getElementById('masuk-pesan');
+    if (!kotak) return;
+    const alasan = this.alasanGagal || 'Server menolak permintaan tanpa keterangan.';
+    kotak.innerHTML = `<div class="pesan gagal"><b>Server menolak:</b> ${UI.esc(alasan)}</div>`;
+
+    const diag = await Api.diagnostik();
+    if (diag && diag.ok) {
+      const d = diag.data || {};
+      const baris = [
+        'CLIENT_ID terisi: ' + (d.clientIdTerisi ? 'ya' : 'TIDAK'),
+        'Sheet Master User terbaca: ' + (d.sheetTerbaca ? 'ya' : 'tidak') + ' — ' + (d.barisMasterUser || 0) + ' baris',
+        'Pengguna terdaftar: ' + ((d.pengguna || []).map((p) => `${p.email} (${p.peran}${p.aktif === 'Y' ? '' : ', nonaktif'})`).join(', ') || 'tidak ada'),
+        'UrlFetchApp: ' + String(d.urlFetchApp || 'tidak diketahui'),
+      ];
+      kotak.innerHTML += '<div class="pesan gagal" style="border-left-color:var(--dekat);background:var(--dekat-l)">' +
+        '<b>Hasil pemeriksaan server:</b><ul style="margin:6px 0 0 16px">' +
+        baris.map((b) => `<li>${UI.esc(b)}</li>`).join('') + '</ul></div>';
+    }
+  },
+
+  /** Ambil profil dari server. Kembalikan null kalau gagal (alasanDisimpan di this.alasanGagal). */
   async ambilProfil() {
     const r = await Api.whoami();
-    if (!r.ok) { UI.toast(r.pesan || 'Tidak bisa masuk.', 'gagal'); return null; }
+    if (!r.ok) { UI.toast(r.pesan || 'Tidak bisa masuk.', 'gagal'); this.alasanGagal = r.pesan || 'Server menolak.'; return null; }
     if (!r.data || !r.data.peran) {
-      UI.toast('Server tidak mengembalikan peran pengguna.', 'gagal');
+      this.alasanGagal = 'Server tidak mengembalikan peran pengguna.';
+      UI.toast(this.alasanGagal, 'gagal');
       return null;
     }
     return r.data;
@@ -65,7 +88,7 @@ const App = {
     document.getElementById('ke-pratinjau').onclick = (e) => { e.preventDefault(); this.bootPratinjau(); };
     Auth.saatTokenBaru(async () => {
       const profil = await this.ambilProfil();
-      if (!profil) return;                       // biarkan layar masuk tetap tampil
+      if (!profil) { this.tampilkanKenapaGagal(); return; }
       this.sembunyikanMasuk();
       if (profil) await this.mulaiDengan(profil);
     });

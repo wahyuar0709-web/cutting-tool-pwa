@@ -27,6 +27,7 @@ const Api = (() => {
         case 'dashboard':   return { ok: true, data: d.dashboard };
         case 'daftarTiket': return { ok: true, data: d.daftarTiket || [] };
         case 'health':      return { ok: true, data: d.healthCheck };
+        case 'diagnostik':  return { ok: false, pesan: 'Diagnostik hanya tersedia di backend sungguhan.', detail: [] };
         case 'kartu': {
           // PENTING: pakai kode yang diminta. Dulu berkas ini hanya berisi satu
           // kartu, sehingga mengetik kode lain tetap menampilkan kartu yang sama
@@ -126,6 +127,7 @@ async function panggil(aksi, argumen) {
   return {
     periksaServer,
     whoami: () => panggil('whoami'),
+    diagnostik: () => panggil('diagnostik'),
     referensi: () => panggil('referensi'),
     dashboard: () => panggil('dashboard'),
     kartuAlat: (kode) => panggil('kartu', { kode }),

@@ -60,8 +60,10 @@ const webGs = fs.readFileSync(path.join(root, 'src/Web.gs'), 'utf8');
 const apiJs = fs.readFileSync(path.join(root, 'web/js/api.js'), 'utf8');
 
 const apiBackend = new Set([...mainGs.matchAll(/function (api_\w+)\s*\(/g)].map((m) => m[1]));
-// daftar aksi yang diizinkan Web.gs
+// daftar aksi yang diizinkan Web.gs: objek dispatch + blok yang ditangani
+// lebih awal (mis. ping dan diagnostik tidak butuh token)
 const aksiWeb = new Set([...webGs.matchAll(/^\s{4}(\w+):\s*\(\)\s*=>/gm)].map((m) => m[1]));
+for (const m of webGs.matchAll(/aksi === '(\w+)'/g)) aksiWeb.add(m[1]);
 // pemanggilan Api.* di frontend
 const pemanggilan = [...apiJs.matchAll(/^\s{4}(\w+):\s*\(/gm)].map((m) => m[1]);
 
