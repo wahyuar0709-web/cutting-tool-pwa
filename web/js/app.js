@@ -14,13 +14,32 @@ const App = {
 
     // Kalau masih ada token yang berlaku, langsung masuk tanpa mengganggu pengguna.
     const ada = await Auth.tokenAktif();
-    if (ada) { this.sembunyikanMasuk(); await this.mulaiDengan(await this.ambilProfil()); return; }
+    if (!ada) return;
+
+    const profil = await this.ambilProfil();
+    if (!profil) {
+      // Token ada tapi server menolaknya. Jangan panggil mulaiDengan(null):
+      // itu bikin "Cannot read properties of null (reading 'peran')" dan
+      // pengguna	left menggantung di spinner tanpa tahu apa yang salah.
+      this.sembunyikanMasuk();
+      Auth.hapus();
+      await this.tampilkanMasuk();
+      document.getElementById('masuk-pesan').innerHTML =
+        '<div class="pesan gagal">Sesi sebelumnya tidak diterima server. Silakan masuk lagi.</div>';
+      return;
+    }
+    this.sembunyikanMasuk();
+    await this.mulaiDengan(profil);
   },
 
   /** Ambil profil dari server (bisa gagal). */
   async ambilProfil() {
     const r = await Api.whoami();
     if (!r.ok) { UI.toast(r.pesan || 'Tidak bisa masuk.', 'gagal'); return null; }
+    if (!r.data || !r.data.peran) {
+      UI.toast('Server tidak mengembalikan peran pengguna.', 'gagal');
+      return null;
+    }
     return r.data;
   },
 
@@ -46,6 +65,7 @@ const App = {
     document.getElementById('ke-pratinjau').onclick = (e) => { e.preventDefault(); this.bootPratinjau(); };
     Auth.saatTokenBaru(async () => {
       const profil = await this.ambilProfil();
+      if (!profil) return;                       // biarkan layar masuk tetap tampil
       this.sembunyikanMasuk();
       if (profil) await this.mulaiDengan(profil);
     });
@@ -148,8 +168,76 @@ const App = {
 
 document.addEventListener('DOMContentLoaded', () => {
   daftarSW();
+  pasangPenangkapKesalahan();
+  watchdog();
   App.boot();
 });
+
+/**
+ * Tangkap kesalahan yang tidak tertangani.
+ *
+ * Tanpa ini, satu kesalahan kecil membuat halaman diam-diam menggantung di
+ * spinner dan pengguna hanya bisa menebak-nebak. Dengan ini, kesalahannya
+ * ditulis di layar dalam Bahasa Indonesia beserta cara memperbaikinya.
+ */
+function pasangPenangkapKesalahan() {
+  const tampilkan = (judul, detail) => {
+    const isi = document.getElementById('isi');
+    if (!isi) return;
+    // jangan timpa tampilan yang sudah jadi
+    if (isi.querySelector('.kartu-penyebab')) return;
+    isi.innerHTML =
+      `<section class="panel kartu-penyebab">
+         <h2>${UI.esc(judul)}</h2>
+         <div class="pesan gagal">${UI.esc(detail || '')}</div>
+         <p class="ket">Yang bisa dicoba:</p>
+         <ul class="ket">
+           <li>Muat ulang halaman dengan <span class="mono">Ctrl+Shift+R</span> (menghapus cache).</li>
+           <li>Pastikan backend Apps Script sudah di-deploy versi terbaru.</li>
+           <li>Buka F12 → Console, cari pesan merah pertama, kirimkan kalau masih gagal.</li>
+         </ul>
+         <p><button class="tombol" onclick="location.reload()">Muat ulang</button>
+            <button class="tombol halus" id="ke-pratinjau2">Lihat pratinjau</button></p>
+       </section>`;
+    const t = document.getElementById('ke-pratinjau2');
+    if (t) t.onclick = () => App.bootPratinjau();
+  };
+
+  window.addEventListener('error', (e) => {
+    tampilkan('Ada kesalahan di halaman', (e.message || 'Kesalahan tidak dikenal') + ' — ' + (e.filename || '') + ' baris ' + (e.lineno || '?'));
+  });
+
+  window.addEventListener('unhandledrejection', (e) => {
+    const a = e.reason;
+    const pesan = (a && (a.message || a.pesan)) || String(a || 'Kesalahan tidak dikenal');
+    tampilkan('Permintaan gagal diproses', pesan);
+  });
+}
+
+/**
+ * Watchdog: kalau 15 detik setelah halaman dimuat belum ada apa-apa yang
+ * dirender, tampilkan diagnosis alih-alih membiarkan spinner berputar.
+ */
+function watchdog() {
+  setTimeout(() => {
+    const isi = document.getElementById('isi');
+    const masuk = document.getElementById('masuk');
+    const masukTerbuka = masuk && !masuk.hidden;
+    const isiKosong = isi && !isi.querySelector('.panel') && !isi.querySelector('.kartu-penyebab');
+    if (isiKosong && !masukTerbuka) {
+      isi.innerHTML =
+        `<section class="panel kartu-penyebab">
+           <h2>Halaman belum selesai memuat</h2>
+           <div class="pesan gagal">Setelah 15 detik tidak ada yang tampil. Kemungkinan pustaka Google tidak termuat, atau ada kesalahan JavaScript.</div>
+           <p class="ket">Periksa F12 → Console untuk pesan merah pertama.</p>
+           <p><button class="tombol" onclick="location.reload()">Muat ulang</button>
+              <button class="tombol halus" id="ke-pratinjau3">Lihat pratinjau dengan data contoh</button></p>
+         </section>`;
+      const t = document.getElementById('ke-pratinjau3');
+      if (t) t.onclick = () => App.bootPratinjau();
+    }
+  }, 15000);
+}
 
 /**
  * Daftarkan service worker supaya aplikasi tetap bisa dibuka tanpa sinyal.
