@@ -2,31 +2,34 @@
    auth.js — masuk dengan akun Google.
 
    Token ID disimpan di memori dan sessionStorage. Token berlaku 1 jam;
-   kalau sudah tinggal < 50 menit, diam-diam minta token baru selama
-   akun masih terhubung. Kalau gagal, pengguna diminta masuk lagi.
+   kalau sudah tinggal < 50 menit, diminta token baru.
 
    Token TIDAK pernah disimpan di localStorage — kalau peramban dipakai
    orang lain, token-nya akan ikut terbaca sampai tab ditutup.
+
+   Catatan: One Tap (google.accounts.id.prompt) sengaja TIDAK dipakai.
+   FedCM akan menjadi wajib, dan prompt() sudah menghasilkan AbortError
+   serta "initialize() is called multiple times". Tombol yang dirender
+   sendiri lebih sederhana dan tidak bermasalah.
    ========================================================================== */
 
 const Auth = (() => {
   let token = null;
   let masaBerlaku = 0;
-  let profil = null;
+  let sudahInisialisasi = false;
 
   const KUNCI = 'ctc-token';
-  const bersiap = new Promise((res) => {
-    if (window.google?.accounts?.id) return res();
-    window.addEventListener('load', () => res());
-  });
 
-  function simpan(t, kedaluwarsa) {
+  function simpan(t, kedaluwarsaMs) {
     token = t;
-    masaBerlaku = kedaluwarsa || (Date.now() + 3600 * 1000);
+    masaBerlaku = kedaluwarsaMs || (Date.now() + 3600 * 1000);
     try {
       sessionStorage.setItem(KUNCI, JSON.stringify({ t: token, s: masaBerlaku }));
     } catch { /* penyimpanan diblokir; token tetap jalan di memori */ }
+    if (typeof onTokenBaru === 'function') onTokenBaru(token);
   }
+
+  let onTokenBaru = null;
 
   function bacaTersimpan() {
     try {
@@ -39,70 +42,74 @@ const Auth = (() => {
   }
 
   function hapus() {
-    token = null; masaBerlaku = 0; profil = null;
+    token = null; masaBerlaku = 0;
     try { sessionStorage.removeItem(KUNCI); } catch { /* abaikan */ }
   }
 
-  /** true kalau ada CLIENT_ID yang bisa dipakai. */
+  /** true kalau CLIENT_ID terisi dan pustaka Google sudah termuat. */
   function bisaMasuk() {
     return !!(KONFIGURASI.CLIENT_ID && window.google?.accounts?.id);
   }
 
-  function siap() {
+  /** Pustaka Google dimuat? */
+  const pustakaDimuat = () => !!(window.google?.accounts?.id);
+
+  /** Inisialisasi HANYA SEKALI. initialize() berulang memicu peringatan dan merusak keadaan token. */
+  function inisialisasi() {
+    if (sudahInisialisasi) return true;
     if (!bisaMasuk()) return false;
     google.accounts.id.initialize({
       client_id: KONFIGURASI.CLIENT_ID,
       callback: (balasan) => {
-        if (!balasan || balasan.credential !== 'undefined') simpan(balasan.credential);
+        if (balasan && typeof balasan.credential === 'string' && balasan.credential !== 'undefined') {
+          simpan(balasan.credential);
+        }
       },
       ux_mode: 'popup',
-      context: 'signin',
+      cancel_on_tap_outside: false,
+      auto_select: true,
     });
+    sudahInisialisasi = true;
     return true;
   }
 
-  /** Ambil token. Kalau ada yang lama masih aman, pakai itu. */
-  async function tokenAktif() {
-    await bersiap;
-    if (!bisaMasuk()) return null;
-    if (token && Date.now() < masaBerlaku - KONFIGURASI.SEGAR_SESUDAH_MS) return token;
-    if (bacaTersimpan()) return token;
-    return mintaToken();
+  /** Tampilkan tombol Google ke dalam wadah yang diberikan. */
+  function pasangTombol(wadah, opsi) {
+    if (!inisialisasi()) return false;
+    wadah.innerHTML = '';
+    google.accounts.id.renderButton(wadah, Object.assign({
+      theme: 'outline', size: 'large', shape: 'rectangular', text: 'continue_with',
+    }, opsi || {}));
+    return true;
   }
 
-  function mintaToken() {
+  /** Tunggu token muncul dari klik tombol. */
+  function tungguToken(ms) {
     return new Promise((res, rej) => {
-      if (!bisaMasuk()) return rej(new Error('CLIENT_ID belum diisi.'));
-      google.accounts.id.initialize({
-        client_id: KONFIGURASI.CLIENT_ID,
-        callback: (b) => {
-          if (b && b.credential && b.credential !== 'undefined') { simpan(b.credential); res(b.credential); }
-          else rej(new Error('Login dibatalkan.'));
-        },
-        ux_mode: 'popup',
-        context: 'signin',
-      });
-      google.accounts.id.prompt((notif) => {
-        if (notif.isNotDisplayed() || notif.isSkippedMoment()) {
-          // popup diblokir atau tidak langsung tampil -> tampilkan tombol
-          const wadah = document.getElementById('wadah-google');
-          if (wadah && !wadah.childElementCount) {
-            google.accounts.id.renderButton(wadah, { theme: 'outline', size: 'large', shape: 'rectangular', text: 'continue_with' });
-          }
-          return;
-        }
-      });
-      setTimeout(() => { if (!token) rej(new Error('Waktu masuk habis.')); }, 60000);
+      if (token) return res(token);
+      const selang = setInterval(() => {
+        if (token) { clearInterval(selang); res(token); }
+      }, 200);
+      setTimeout(() => { clearInterval(selang); if (!token) rej(new Error('Waktu masuk habis.')); }, ms || 90000);
     });
+  }
+
+  /** Ambil token yang masih berlaku, atau null kalau belum masuk. */
+  function tokenAktif() {
+    if (token && Date.now() < masaBerlaku - KONFIGURASI.SEGAR_SESUDAH_MS) return Promise.resolve(token);
+    if (bacaTersimpan()) return Promise.resolve(token);
+    return Promise.resolve(null);
   }
 
   return {
     bisaMasuk,
+    pustakaDimuat,
+    inisialisasi,
+    pasangTombol,
+    tungguToken,
     tokenAktif,
-    siap,
     hapus,
-    get profil() { return profil; },
-    set profil(p) { profil = p; },
+    saatTokenBaru(fn) { onTokenBaru = fn; },
     get sudahMasuk() { return !!token; },
   };
 })();

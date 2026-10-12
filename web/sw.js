@@ -5,7 +5,7 @@
  * cangkang (shell) harus tetap bisa dibuka tanpa internet. Data tetap
  * diambil dari server saat ada koneksi.
  */
-const VERSI = 'ctc-v1';
+const VERSI = 'ctc-v2';
 const CANGKAR = [
   './',
   './index.html',
@@ -42,11 +42,18 @@ self.addEventListener('fetch', (e) => {
     return;
   }
 
-  // aset statis: cache dulu, lalu perbarui di belakang
+  // Aset statis: cache dulu, lalu perbarui di belakang.
+  //
+  // PENTING: pakai r.clone() saat menyimpan. Kalau r disimpan apa adanya,
+  // badan responsnya sudah dianggap habis, lalu "Response body is already used"
+  // saat respons yang sama dikembalikan ke halaman.
   e.respondWith(
     caches.match(e.request).then((cached) => {
       const jaringan = fetch(e.request).then((r) => {
-        if (r && r.status === 200) caches.open(VERSI).then((c) => c.put(e.request, r));
+        if (r && r.status === 200 && r.type === 'basic') {
+          const salinan = r.clone();
+          caches.open(VERSI).then((c) => c.put(e.request, salinan)).catch(() => {});
+        }
         return r;
       }).catch(() => cached);
       return cached || jaringan;

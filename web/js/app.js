@@ -12,15 +12,16 @@ const App = {
     if (!KONFIGURASI.CLIENT_ID) { this.bootPratinjau(); return; }
     await this.tampilkanMasuk();
 
+    // Kalau masih ada token yang berlaku, langsung masuk tanpa mengganggu pengguna.
+    const ada = await Auth.tokenAktif();
+    if (ada) { this.sembunyikanMasuk(); await this.mulaiDengan(await this.ambilProfil()); return; }
+  },
+
+  /** Ambil profil dari server (bisa gagal). */
+  async ambilProfil() {
     const r = await Api.whoami();
-    if (!r.ok) {
-      if (r.perluMasuk || /token|Belum masuk/i.test(r.pesan || '')) { this.sembunyikanMasuk(); return; }
-      this.sembunyikanMasuk();
-      UI.toast(r.pesan || 'Tidak bisa masuk.', 'gagal');
-      return;
-    }
-    this.sembunyikanMasuk();
-    await this.mulaiDengan(r.data);
+    if (!r.ok) { UI.toast(r.pesan || 'Tidak bisa masuk.', 'gagal'); return null; }
+    return r.data;
   },
 
   /** Tampilkan layar masuk dengan tombol Google. */
@@ -30,21 +31,24 @@ const App = {
     el.hidden = false;
     pesan.innerHTML = '<span class="memuat"></span>';
 
-    // Tunggu Google Identity Services termuat
-    for (let i = 0; i < 40 && !window.google?.accounts?.id; i++) {
+    // Tunggu pustaka Google termuat (maks 8 detik)
+    for (let i = 0; i < 54 && !Auth.pustakaDimuat(); i++) {
       await new Promise((r) => setTimeout(r, 150));
     }
-    if (!window.google?.accounts?.id) {
-      pesan.innerHTML = '<div class="pesan gagal">Google Identity Services gagal dimuat. Periksa koneksi internet.</div>';
+    if (!Auth.pustakaDimuat()) {
+      pesan.innerHTML = '<div class="pesan gagal">Google Identity Services gagal dimuat. Periksa koneksi internet, lalu muat ulang halaman.</div>';
       return;
     }
     pesan.innerHTML = '';
-    Auth.siap();
-    google.accounts.id.renderButton(document.getElementById('wadah-google'), {
-      theme: 'outline', size: 'large', shape: 'rectangular', text: 'continue_with',
-    });
 
+    const wadah = document.getElementById('wadah-google');
+    Auth.pasangTombol(wadah);
     document.getElementById('ke-pratinjau').onclick = (e) => { e.preventDefault(); this.bootPratinjau(); };
+    Auth.saatTokenBaru(async () => {
+      const profil = await this.ambilProfil();
+      this.sembunyikanMasuk();
+      if (profil) await this.mulaiDengan(profil);
+    });
   },
 
   sembunyikanMasuk() { document.getElementById('masuk').hidden = true; },

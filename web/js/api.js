@@ -59,12 +59,7 @@ const Api = (() => {
    */
 
   async function dariHttp(aksi, argumen) {
-    let token;
-    try {
-      token = await Auth.tokenAktif();
-    } catch (e) {
-      return { ok: false, pesan: 'Belum masuk. Masuk dengan akun Google dulu.', detail: [], perluMasuk: true };
-    }
+    const token = await Auth.tokenAktif();
     if (!token) return { ok: false, pesan: 'Belum masuk.', detail: [], perluMasuk: true };
 
     try {
