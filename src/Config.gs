@@ -3,6 +3,13 @@
  * Tidak ada magic number di file lain.
  */
 const CONFIG = {
+  /**
+   * Stempel build. NAIKKAN setiap kali kode didorong.
+   * Aksi `ping` mengembalikannya, sehingga kita bisa memastikan versi mana
+   * yang benar-benar hidup di deployment — tanpa menebak.
+   */
+  BUILD: '2026-10-12-01',
+
   SPREADSHEET_ID: '1TQd2aUErMypDsrlbKaos1j8WHha_FqX5F7fXlgglhN0',
 
   /**

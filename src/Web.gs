@@ -65,7 +65,12 @@ function doPost(e) {
 
   // Health check doesn't need identity — used by the frontend to check connection
   if (aksi === 'ping') {
-    return json_(200, 'OK', { nama: WEB.NAMA, versi: WEB.VERSI, waktu: new Date().toISOString() });
+    return json_(200, 'OK', {
+      nama: WEB.NAMA,
+      versi: WEB.VERSI,
+      build: CONFIG.BUILD,
+      waktu: new Date().toISOString(),
+    });
   }
 
   // Diagnosis juga tanpa token: kebutuhan untuk melihat apakah sheet terbaca

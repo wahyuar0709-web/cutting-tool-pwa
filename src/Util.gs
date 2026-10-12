@@ -31,14 +31,14 @@ function huruf_(n) {
  *values.get MELOMPATI baris kosong, jadi jangan pernah meng indeks baris tetap.
  */
 function header_(sheet) {
-  const cache = CacheService.getScriptCache();
+  const cached = CacheService.getScriptCache();
   const kunci = 'hdr:' + sheet.getSheetId();
-  const tersimpan = cache.get(kunci);
+  const tersimpan = cached.get(kunci);
   if (tersimpan) return JSON.parse(tersimpan);
   const baris = sheet.getRange(1, 1, 1, sheet.getLastColumn()).getValues()[0] || [];
   const peta = {};
   baris.forEach((h, i) => { const n = String(h || '').trim(); if (n) peta[n] = i + 1; });
-  cache.put(kunci, JSON.stringify(peta), CONFIG.CACHE_TTL);
+  cached.put(kunci, JSON.stringify(peta), CONFIG.CACHE_TTL);
   return peta;
 }
 
